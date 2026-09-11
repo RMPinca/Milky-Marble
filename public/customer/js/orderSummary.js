@@ -61,8 +61,6 @@ window.renderOrderSummaryModal = async function(items = []) {
   });
   const paymentReq = document.getElementById('paymentRequiredMsg');
   if (paymentReq) paymentReq.style.display = 'none';
-  const ewalletHint = document.getElementById('ewalletHint');
-  if (ewalletHint) ewalletHint.style.display = 'none';
 
   // Reset promo code inputs
   const promoInput = document.getElementById('promoCodeInput');
@@ -209,10 +207,6 @@ window.selectPaymentMethod = function(btnElement) {
 
   const paymentReq = document.getElementById('paymentRequiredMsg');
   if (paymentReq) paymentReq.style.display = 'none';
-
-  // Give a heads-up that E-Wallet hands off to PayMongo's live checkout page.
-  const ewalletHint = document.getElementById('ewalletHint');
-  if (ewalletHint) ewalletHint.style.display = (selectedPaymentMethod === 'E-Wallet') ? 'block' : 'none';
 };
 
 function setNextDefaultPickupDate() {
@@ -494,58 +488,6 @@ window.confirmPlaceOrder = async function() {
     const data = await res.json();
 
     if (res.ok && data.status === 'success') {
-      // E-Wallet orders that still need to be paid get handed off to PayMongo's
-      // live hosted checkout (GCash / Maya / GrabPay / ShopeePay) instead of
-      // being confirmed immediately.
-      const needsEwalletPayment = paymentMethodForOrder === 'E-Wallet' && data.order.status !== 'PAID_VERIFIED';
-
-      if (needsEwalletPayment) {
-        try {
-          const payRes = await fetch('/api/payments/create-checkout', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              order_id: data.order.id,
-              billing_name: currentRecipient.name,
-              billing_email: currentRecipient.email
-            })
-          });
-          const payData = await payRes.json();
-
-          if (payRes.ok && payData.status === 'success' && payData.checkout_url) {
-            // Full redirect to PayMongo's hosted checkout page.
-            window.location.href = payData.checkout_url;
-            return;
-          }
-
-          throw new Error(payData.message || 'Could not start PayMongo checkout.');
-        } catch (payErr) {
-          console.error('PayMongo checkout error:', payErr);
-          if (typeof Swal !== 'undefined') {
-            Swal.fire({
-              target: document.body,
-              icon: 'error',
-              title: 'Payment Could Not Start',
-              text: payErr.message || 'We placed your order, but could not open the PayMongo payment page. Please try paying again from your Orders page.',
-              confirmButtonText: 'OK',
-              customClass: {
-                container: 'mm-order-swal-container',
-                popup: 'custom-swal-popup',
-                title: 'custom-swal-title',
-                htmlContainer: 'custom-swal-html',
-                confirmButton: 'custom-swal-confirm'
-              },
-              buttonsStyling: false
-            });
-          }
-          if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.innerText = 'Place Order';
-          }
-          return;
-        }
-      }
-
       closeOrderSummaryModal();
 
       lastPlacedOrderData = {

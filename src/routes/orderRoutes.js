@@ -74,12 +74,7 @@ router.post('/', async (req, res) => {
     const validOrderType = isCustomOrder ? 'custom_build' : 'preset';
 
     // 2. Tiyaking pumasa sa orders_status_check: 'PENDING_PAYMENT' o 'PAID_VERIFIED'
-    // E-Wallet orders now wait for a real PayMongo payment confirmation before
-    // being marked PAID_VERIFIED (see /api/payments/create-checkout + verify/webhook),
-    // unless there's literally nothing left to charge (fully covered by promo/points).
-    const validStatus = (payment_method === 'E-Wallet' && finalTotalAmount <= 0)
-      ? 'PAID_VERIFIED'
-      : 'PENDING_PAYMENT';
+    const validStatus = (payment_method === 'E-Wallet') ? 'PAID_VERIFIED' : 'PENDING_PAYMENT';
 
     const orderPayload = {
       customer_id: targetCustomerId,

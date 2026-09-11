@@ -8,7 +8,6 @@ const nodemailer = require('nodemailer');
 // Import Auth Routes
 const authRoutes = require('./src/routes/authRoutes');
 const orderRoutes = require('./src/routes/orderRoutes');
-const paymentRoutes = require('./src/routes/paymentRoutes');
 
 let bcrypt = null;
 try {
@@ -79,12 +78,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// `verify` stashes the raw request bytes on req.rawBody, which the PayMongo
-// webhook handler needs to validate the Paymongo-Signature header.
-app.use(express.json({
-  limit: '10mb',
-  verify: (req, res, buf) => { req.rawBody = buf; }
-}));
+app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 // ==========================================
@@ -823,7 +817,6 @@ app.post('/api/customer/deactivate', async (req, res) => {
 // ==========================================
 app.use('/api/auth', authRoutes);
 app.use('/api/orders', orderRoutes);
-app.use('/api/payments', paymentRoutes);
 
 app.post('/api/auth/logout', (req, res) => res.json({ status: 'success', message: 'Logged out successfully.' }));
 
@@ -832,19 +825,7 @@ app.use((req, res) => {
   res.status(404).json({ status: 'error', message: 'Endpoint not found.' });
 });
 
-// ==========================================
-// SERVER STARTUP
-// Only bind to a port when this file is run directly (e.g. `node server.js`
-// locally or in Docker). When Vercel imports this module inside its
-// serverless function wrapper (api/index.js), `require.main` will be that
-// wrapper, not this file, so we skip listen() and just export the app -
-// Vercel's Node runtime invokes it directly as a request handler instead.
-// ==========================================
-if (require.main === module) {
-  app.listen(PORT, () => {
-    console.log(`Server is running inside Docker on internal port ${PORT}`);
-    console.log(`Access in browser at http://localhost:8001/customer/home.html`);
-  });
-}
-
-module.exports = app;
+app.listen(PORT, () => {
+  console.log(`Server is running inside Docker on internal port ${PORT}`);
+  console.log(`Access in browser at http://localhost:8001/customer/home.html`);
+});
