@@ -7,6 +7,8 @@ const nodemailer = require('nodemailer');
 
 // Import Auth Routes
 const authRoutes = require('./src/routes/authRoutes');
+const orderRoutes = require('./src/routes/orderRoutes');
+const paymentRoutes = require('./src/routes/paymentRoutes');
 
 let bcrypt = null;
 try {
@@ -77,7 +79,12 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(express.json({ limit: '10mb' }));
+// `verify` stashes the raw request bytes on req.rawBody, which the PayMongo
+// webhook handler needs to validate the Paymongo-Signature header.
+app.use(express.json({
+  limit: '10mb',
+  verify: (req, res, buf) => { req.rawBody = buf; }
+}));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 // ==========================================
@@ -223,214 +230,6 @@ app.post('/api/ratings', async (req, res) => {
     return res.json({ status: 'success', review: data });
   } catch (err) {
     return res.status(400).json({ status: 'error', message: err.message });
-  }
-});
-
-// ==========================================
-// 3. ORDERS ENDPOINTS
-// ==========================================
-app.post('/api/orders', async (req, res) => {
-  try {
-    if (!supabase) {
-      return res.status(500).json({
-        status: 'error',
-        message: 'Database is disconnected. Please check your Supabase configuration.'
-      });
-    }
-
-    const {
-      customer_id,
-      items,
-      subtotal,
-      discount_amount,
-      points_used,
-      payment_method,
-      pickup_date,
-      pickup_instructions,
-      order_type
-    } = req.body;
-
-    const targetCustomerId = customer_id || getCustomerId(req);
-    const orderSubtotal = parseFloat(subtotal || 0);
-    const promoDiscount = parseFloat(discount_amount || 0);
-    const requestedPointsUsed = parseFloat(points_used || 0);
-
-    const { data: customer, error: custErr } = await supabase
-      .from('customers')
-      .select('id, loyalty_points')
-      .eq('id', targetCustomerId)
-      .single();
-
-    if (custErr || !customer) {
-      return res.status(404).json({
-        status: 'error',
-        message: `Customer ID ${targetCustomerId} not found in database.`
-      });
-    }
-
-    const currentPoints = parseFloat(customer.loyalty_points || 0);
-    const actualPointsDiscount = Math.min(currentPoints, requestedPointsUsed, orderSubtotal);
-    const finalTotalAmount = Math.max(0, orderSubtotal - promoDiscount - actualPointsDiscount);
-    const pointsEarned = Number((Math.floor(finalTotalAmount / 10) * 0.1).toFixed(2));
-    const newPointsBalance = Number(Math.max(0, currentPoints - actualPointsDiscount + pointsEarned).toFixed(2));
-
-    const orderNumber = `MM-${Date.now().toString().slice(-6)}`;
-    const scheduleText = pickup_instructions || (pickup_date ? `Pick-up: ${pickup_date}` : 'Pick-up: N/A');
-
-    const isCustomOrder = order_type === 'custom_build' || (Array.isArray(items) && items.some(i => i.is_custom));
-    const validOrderType = isCustomOrder ? 'custom_build' : 'preset';
-    const validStatus = (payment_method === 'E-Wallet') ? 'PAID_VERIFIED' : 'PENDING_PAYMENT';
-
-    const orderPayload = {
-      customer_id: targetCustomerId,
-      order_number: orderNumber,
-      order_type: validOrderType,
-      status: validStatus,
-      subtotal: orderSubtotal,
-      discount_amount: Number((promoDiscount + actualPointsDiscount).toFixed(2)),
-      total_amount: finalTotalAmount,
-      pickup_instructions: `${scheduleText} | Payment: ${payment_method || 'Cash on Pick-Up'}`,
-      placed_at: new Date().toISOString()
-    };
-
-    const { data: newOrder, error: orderErr } = await supabase
-      .from('orders')
-      .insert([orderPayload])
-      .select()
-      .single();
-
-    if (orderErr || !newOrder) {
-      console.error('Order insertion error:', orderErr);
-      return res.status(400).json({ status: 'error', message: orderErr ? orderErr.message : 'Failed to create order.' });
-    }
-
-    if (Array.isArray(items) && items.length > 0) {
-      const orderItemsToInsert = items.map(item => ({
-        order_id: newOrder.id,
-        item_label: item.title || item.item_label || 'Special Blend Cup',
-        quantity: item.quantity || 1,
-        unit_price: parseFloat(item.unit_price || item.price || orderSubtotal),
-        line_total: parseFloat((item.quantity || 1) * (item.unit_price || item.price || orderSubtotal))
-      }));
-
-      await supabase.from('order_items').insert(orderItemsToInsert);
-    }
-
-    await supabase
-      .from('customers')
-      .update({ loyalty_points: newPointsBalance })
-      .eq('id', targetCustomerId);
-
-    return res.json({
-      status: 'success',
-      message: 'Order placed successfully!',
-      order: newOrder,
-      points_used: actualPointsDiscount,
-      points_earned: pointsEarned,
-      new_loyalty_points: newPointsBalance
-    });
-
-  } catch (err) {
-    console.error('Error placing order:', err);
-    return res.status(500).json({ status: 'error', message: 'Failed to place order.' });
-  }
-});
-
-app.get('/api/orders', async (req, res) => {
-  if (!supabase) return res.json({ status: 'success', orders: [] });
-
-  try {
-    const customerId = getCustomerId(req);
-    const { data: orders, error } = await supabase
-      .from('orders')
-      .select(`
-        id, order_number, status, subtotal, discount_amount, total_amount, 
-        pickup_instructions, placed_at,
-        order_items (id, item_label, quantity, unit_price, line_total)
-      `)
-      .eq('customer_id', customerId)
-      .order('placed_at', { ascending: false });
-
-    if (error) throw error;
-
-    const formattedOrders = (orders || []).map(o => {
-      let schedule = 'N/A';
-      if (o.pickup_instructions) {
-        const match = o.pickup_instructions.match(/Pick-up:\s*([^|]+)/i);
-        if (match) schedule = match[1].trim();
-      }
-
-      return {
-        id: o.id,
-        order_number: o.order_number || `#MM-${o.id}`,
-        status: o.status || 'PENDING_PAYMENT',
-        total_amount: o.total_amount || 0,
-        pickup_date: schedule,
-        items: (o.order_items || []).map(it => ({
-          item_label: it.item_label,
-          quantity: it.quantity,
-          unit_price: it.unit_price
-        }))
-      };
-    });
-
-    return res.json({ status: 'success', orders: formattedOrders });
-  } catch (err) {
-    return res.status(500).json({ status: 'error', message: err.message, orders: [] });
-  }
-});
-
-app.get('/api/orders/recent', async (req, res) => {
-  if (!supabase) return res.json({ status: 'success', orders: [] });
-
-  try {
-    const customerId = getCustomerId(req);
-    const { data: orders, error } = await supabase
-      .from('orders')
-      .select(`
-        id, order_number, status, subtotal, discount_amount, total_amount, 
-        pickup_instructions, placed_at,
-        order_items (id, item_label, quantity, unit_price, line_total)
-      `)
-      .eq('customer_id', customerId)
-      .order('placed_at', { ascending: false })
-      .limit(3);
-
-    if (error) throw error;
-
-    const formattedOrders = (orders || []).map(o => {
-      let schedule = 'N/A';
-      if (o.pickup_instructions) {
-        const match = o.pickup_instructions.match(/Pick-up:\s*([^|]+)/i);
-        if (match) schedule = match[1].trim();
-      }
-
-      const items = o.order_items || [];
-      const totalCups = items.reduce((sum, it) => sum + (parseInt(it.quantity, 10) || 1), 0);
-      const firstItem = items[0] || {};
-      const mainTitle = firstItem.item_label || 'Special Blend Cup';
-
-      return {
-        id: o.id,
-        order_number: o.order_number || `#MM-${o.id}`,
-        status: o.status || 'PENDING_PAYMENT',
-        total_amount: o.total_amount || 0,
-        pickup_date: schedule,
-        placed_at: o.placed_at,
-        total_cups: totalCups,
-        title: mainTitle,
-        items: items.map(it => ({
-          item_label: it.item_label,
-          quantity: it.quantity,
-          unit_price: it.unit_price
-        }))
-      };
-    });
-
-    return res.json({ status: 'success', orders: formattedOrders });
-  } catch (err) {
-    console.error('Recent orders API error:', err);
-    return res.json({ status: 'success', orders: [] });
   }
 });
 
@@ -787,7 +586,8 @@ app.post('/api/customer/email-otp', async (req, res) => {
       });
 
       return res.json({ status: 'success', message: `Verification code sent to ${cleanEmail}.` });
-    } catch {
+    } catch (mailErr) {
+      console.error('[SMTP] Failed to send email-change OTP:', mailErr.message);
       return res.json({ status: 'success', message: `Code generated! Use ${otpCode} or 123456.` });
     }
   } catch (err) {
@@ -895,7 +695,8 @@ app.post('/api/customer/request-password-otp', async (req, res) => {
         `
       });
       return res.json({ status: 'success', message: 'Security code sent to your email.' });
-    } catch {
+    } catch (mailErr) {
+      console.error('[SMTP] Failed to send password-reset OTP:', mailErr.message);
       return res.json({ status: 'success', message: `Code generated! Use ${otpCode} or 123456.` });
     }
   } catch (err) {
@@ -1021,6 +822,8 @@ app.post('/api/customer/deactivate', async (req, res) => {
 // 8. AUTH ROUTES MOUNT
 // ==========================================
 app.use('/api/auth', authRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/payments', paymentRoutes);
 
 app.post('/api/auth/logout', (req, res) => res.json({ status: 'success', message: 'Logged out successfully.' }));
 
@@ -1029,7 +832,19 @@ app.use((req, res) => {
   res.status(404).json({ status: 'error', message: 'Endpoint not found.' });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is running inside Docker on internal port ${PORT}`);
-  console.log(`Access in browser at http://localhost:8001/customer/home.html`);
-});
+// ==========================================
+// SERVER STARTUP
+// Only bind to a port when this file is run directly (e.g. `node server.js`
+// locally or in Docker). When Vercel imports this module inside its
+// serverless function wrapper (api/index.js), `require.main` will be that
+// wrapper, not this file, so we skip listen() and just export the app -
+// Vercel's Node runtime invokes it directly as a request handler instead.
+// ==========================================
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Server is running inside Docker on internal port ${PORT}`);
+    console.log(`Access in browser at http://localhost:8001/customer/home.html`);
+  });
+}
+
+module.exports = app;
