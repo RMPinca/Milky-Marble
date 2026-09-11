@@ -609,12 +609,15 @@ window.cancelOrder = function(orderId) {
     showCancelButton: true,
     confirmButtonText: 'Yes, Cancel It',
     cancelButtonText: 'Keep Order',
+    target: document.body,
     customClass: {
-      popup: 'custom-swal-popup',
-      title: 'custom-swal-title',
-      htmlContainer: 'custom-swal-html',
-      confirmButton: 'custom-swal-danger-confirm',
-      cancelButton: 'custom-swal-cancel'
+      container: 'mm-swal-container-top',
+      popup: 'mm-swal-popup',
+      title: 'mm-swal-title',
+      htmlContainer: 'mm-swal-html',
+      actions: 'mm-swal-actions',
+      confirmButton: 'mm-swal-confirm-btn',
+      cancelButton: 'mm-swal-cancel-btn'
     },
     buttonsStyling: false,
     reverseButtons: true
@@ -648,12 +651,15 @@ window.confirmOrderReceived = function(orderId) {
     showCancelButton: true,
     confirmButtonText: 'Yes, Claimed!',
     cancelButtonText: 'Not Yet',
+    target: document.body,
     customClass: {
-      popup: 'custom-swal-popup',
-      title: 'custom-swal-title',
-      htmlContainer: 'custom-swal-html',
-      confirmButton: 'custom-swal-confirm',
-      cancelButton: 'custom-swal-cancel'
+      container: 'mm-swal-container-top',
+      popup: 'mm-swal-popup',
+      title: 'mm-swal-title',
+      htmlContainer: 'mm-swal-html',
+      actions: 'mm-swal-actions',
+      confirmButton: 'mm-swal-confirm-btn',
+      cancelButton: 'mm-swal-cancel-btn'
     },
     buttonsStyling: false,
     reverseButtons: true

@@ -1534,7 +1534,7 @@ function checkWelcomeBackModal() {
 
       showSweetAlert({
         icon: 'success',
-        title: 'Welcome Back!',
+        title: 'Welcome!',
         html: `Yay, you're logged in as <strong>${displayName}</strong>!<br>Ready to pop the straw and build your sweet sips?`,
         showCancelButton: true,
         confirmButtonText: "Let's Sip!",

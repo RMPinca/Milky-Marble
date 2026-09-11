@@ -787,7 +787,8 @@ app.post('/api/customer/email-otp', async (req, res) => {
       });
 
       return res.json({ status: 'success', message: `Verification code sent to ${cleanEmail}.` });
-    } catch {
+    } catch (mailErr) {
+      console.error('[SMTP] Failed to send email-change OTP:', mailErr.message);
       return res.json({ status: 'success', message: `Code generated! Use ${otpCode} or 123456.` });
     }
   } catch (err) {
@@ -895,7 +896,8 @@ app.post('/api/customer/request-password-otp', async (req, res) => {
         `
       });
       return res.json({ status: 'success', message: 'Security code sent to your email.' });
-    } catch {
+    } catch (mailErr) {
+      console.error('[SMTP] Failed to send password-reset OTP:', mailErr.message);
       return res.json({ status: 'success', message: `Code generated! Use ${otpCode} or 123456.` });
     }
   } catch (err) {

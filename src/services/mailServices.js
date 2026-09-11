@@ -1,13 +1,15 @@
-import nodemailer from 'nodemailer';
+const nodemailer = require('nodemailer');
 
 // 1. Transporter configuration (RFC-compliant Gmail SMTP)
+const smtpPort = parseInt(process.env.SMTP_PORT || '465', 10);
+
 const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: parseInt(process.env.SMTP_PORT || '465', 10),
-    secure: true, // Port 465 uses SSL/SMTPS
+    port: smtpPort,
+    secure: smtpPort === 465, // 465 = implicit TLS (secure:true), 587 = STARTTLS (secure:false)
     auth: {
-        user: process.env.SMTP_USER || 'milkymarble.supportcenter@gmail.com',
-        pass: process.env.SMTP_PASS || 'knke hyxg fpci lupr'
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS
     },
     tls: {
         rejectUnauthorized: false // katumbas ng verify_peer: false sa PHPMailer
@@ -34,7 +36,7 @@ function escapeHtml(str = '') {
 /**
  * Master Template Wrapper na may UCC Congressional & Social Channels
  */
-export function renderEmailLayout(badgeText, mainHeading, bodyHtml) {
+function renderEmailLayout(badgeText, mainHeading, bodyHtml) {
     const currentYear = new Date().getFullYear();
 
     return `
@@ -106,7 +108,7 @@ export function renderEmailLayout(badgeText, mainHeading, bodyHtml) {
 // -------------------------------------------------------------
 // STAGE 1: CONFIRMED (Order Receipt)
 // -------------------------------------------------------------
-export async function sendOrderConfirmedEmail(toEmail, recipientName, orderData = {}) {
+async function sendOrderConfirmedEmail(toEmail, recipientName, orderData = {}) {
     if (!toEmail) return false;
 
     try {
@@ -199,12 +201,12 @@ export async function sendOrderConfirmedEmail(toEmail, recipientName, orderData 
     }
 }
 
-export const sendOrderReceiptEmail = sendOrderConfirmedEmail;
+const sendOrderReceiptEmail = sendOrderConfirmedEmail;
 
 // -------------------------------------------------------------
 // STAGE 2: PREPARING (Kitchen Prep)
 // -------------------------------------------------------------
-export async function sendOrderPreparingEmail(toEmail, recipientName, orderRef) {
+async function sendOrderPreparingEmail(toEmail, recipientName, orderRef) {
     if (!toEmail) return false;
 
     try {
@@ -242,7 +244,7 @@ export async function sendOrderPreparingEmail(toEmail, recipientName, orderRef) 
 // -------------------------------------------------------------
 // STAGE 3: READY FOR PICKUP (Campus Counter Alert)
 // -------------------------------------------------------------
-export async function sendOrderReadyEmail(toEmail, recipientName, orderRef, pickupSchedule = '') {
+async function sendOrderReadyEmail(toEmail, recipientName, orderRef, pickupSchedule = '') {
     if (!toEmail) return false;
 
     try {
@@ -281,7 +283,7 @@ export async function sendOrderReadyEmail(toEmail, recipientName, orderRef, pick
 // -------------------------------------------------------------
 // STAGE 4: COMPLETED (Order Received)
 // -------------------------------------------------------------
-export async function sendOrderCompletedEmail(toEmail, recipientName, orderRef) {
+async function sendOrderCompletedEmail(toEmail, recipientName, orderRef) {
     if (!toEmail) return false;
 
     try {
@@ -317,7 +319,7 @@ export async function sendOrderCompletedEmail(toEmail, recipientName, orderRef) 
 // -------------------------------------------------------------
 // STAGE 5: CANCELLED (Cancellation Notice)
 // -------------------------------------------------------------
-export async function sendOrderCancelledEmail(toEmail, recipientName, orderRef) {
+async function sendOrderCancelledEmail(toEmail, recipientName, orderRef) {
     if (!toEmail) return false;
 
     try {
@@ -354,7 +356,7 @@ export async function sendOrderCancelledEmail(toEmail, recipientName, orderRef) 
 // -------------------------------------------------------------
 // STAGE 6: WELCOME VOUCHER (VIP Club Perks)
 // -------------------------------------------------------------
-export async function sendPromoWelcomeEmail(toEmail, recipientName) {
+async function sendPromoWelcomeEmail(toEmail, recipientName) {
     if (!toEmail) return false;
 
     try {
@@ -393,7 +395,7 @@ export async function sendPromoWelcomeEmail(toEmail, recipientName) {
 // -------------------------------------------------------------
 // OTP SECURITY EMAIL (Verification Code)
 // -------------------------------------------------------------
-export async function sendSecurityOtpEmail(toEmail, recipientName, otpCode, purpose = 'email_change') {
+async function sendSecurityOtpEmail(toEmail, recipientName, otpCode, purpose = 'email_change') {
     if (!toEmail) return false;
 
     try {
@@ -433,7 +435,7 @@ export async function sendSecurityOtpEmail(toEmail, recipientName, otpCode, purp
 // -------------------------------------------------------------
 // ORDER STATUS DISPATCHER
 // -------------------------------------------------------------
-export async function dispatchOrderStatusEmail(toEmail, recipientName, orderRef, status, pickupSchedule = '', extraOrderData = {}) {
+async function dispatchOrderStatusEmail(toEmail, recipientName, orderRef, status, pickupSchedule = '', extraOrderData = {}) {
     const cleanStatus = (status || '').toUpperCase().trim();
 
     switch (cleanStatus) {
@@ -454,3 +456,16 @@ export async function dispatchOrderStatusEmail(toEmail, recipientName, orderRef,
             return false;
     }
 }
+
+module.exports = {
+    renderEmailLayout,
+    sendOrderConfirmedEmail,
+    sendOrderReceiptEmail,
+    sendOrderPreparingEmail,
+    sendOrderReadyEmail,
+    sendOrderCompletedEmail,
+    sendOrderCancelledEmail,
+    sendPromoWelcomeEmail,
+    sendSecurityOtpEmail,
+    dispatchOrderStatusEmail
+};
