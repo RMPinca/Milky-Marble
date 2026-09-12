@@ -39,6 +39,14 @@ router.post('/', async (req, res) => {
     const promoDiscount = parseFloat(discount_amount || 0);
     const requestedPointsUsed = parseFloat(points_used || 0);
 
+    const VALID_PAYMENT_METHODS = ['Cash on Pick-Up', 'E-Wallet'];
+    if (!payment_method || !VALID_PAYMENT_METHODS.includes(payment_method)) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Please select a valid payment method (Cash on Pick-Up or E-Wallet).'
+      });
+    }
+
     const { data: customer, error: custErr } = await supabase
       .from('customers')
       .select('id, loyalty_points')
@@ -66,7 +74,11 @@ router.post('/', async (req, res) => {
     const validOrderType = isCustomOrder ? 'custom_build' : 'preset';
 
     // 2. Tiyaking pumasa sa orders_status_check: 'PENDING_PAYMENT' o 'PAID_VERIFIED'
-    const validStatus = (payment_method === 'E-Wallet') ? 'PAID_VERIFIED' : 'PENDING_PAYMENT';
+    // NOTE: Orders always start PENDING_PAYMENT now. For "E-Wallet" orders, status
+    // only flips to PAID_VERIFIED once PayMongo confirms the QRPh payment (via
+    // webhook, see src/routes/paymentRoutes.js) — we no longer auto-mark orders
+    // as paid at creation time, since no actual payment had happened yet.
+    const validStatus = 'PENDING_PAYMENT';
 
     const orderPayload = {
       customer_id: targetCustomerId,
@@ -77,6 +89,7 @@ router.post('/', async (req, res) => {
       discount_amount: Number((promoDiscount + actualPointsDiscount).toFixed(2)),
       total_amount: finalTotalAmount,
       pickup_instructions: `${scheduleText} | Payment: ${payment_method || 'Cash on Pick-Up'}`,
+      payment_method: payment_method || 'Cash on Pick-Up',
       placed_at: new Date().toISOString()
     };
 
@@ -103,12 +116,35 @@ router.post('/', async (req, res) => {
       await supabase.from('order_items').insert(orderItemsToInsert);
     }
 
-    await supabase
+    const { data: updatedCustomer, error: pointsUpdateErr } = await supabase
       .from('customers')
       .update({ loyalty_points: newPointsBalance })
-      .eq('id', targetCustomerId);
+      .eq('id', targetCustomerId)
+      .select('id, loyalty_points')
+      .single();
 
-    console.log(`[ROUTE LOYALTY SYNC] Customer ${targetCustomerId}: ${currentPoints} -> ${newPointsBalance} pts.`);
+    if (pointsUpdateErr || !updatedCustomer) {
+      // The order itself was already created successfully - don't fail the
+      // whole request - but make sure this is loud and visible, since a
+      // silent failure here means points never actually get deducted.
+      console.error(
+        `[ROUTE LOYALTY SYNC] FAILED to update Customer ${targetCustomerId} points ` +
+        `(${currentPoints} -> ${newPointsBalance}):`,
+        pointsUpdateErr ? pointsUpdateErr.message : 'no row returned (check RLS policy on customers table / SUPABASE_SERVICE_ROLE_KEY)'
+      );
+
+      return res.json({
+        status: 'success',
+        message: 'Order placed successfully, but loyalty points could not be updated. Please contact support.',
+        order: newOrder,
+        points_used: actualPointsDiscount,
+        points_earned: pointsEarned,
+        new_loyalty_points: currentPoints, // unchanged - reflect reality, not the intended value
+        points_sync_error: true
+      });
+    }
+
+    console.log(`[ROUTE LOYALTY SYNC] Customer ${targetCustomerId}: ${currentPoints} -> ${updatedCustomer.loyalty_points} pts.`);
 
     return res.json({
       status: 'success',
@@ -116,7 +152,7 @@ router.post('/', async (req, res) => {
       order: newOrder,
       points_used: actualPointsDiscount,
       points_earned: pointsEarned,
-      new_loyalty_points: newPointsBalance
+      new_loyalty_points: updatedCustomer.loyalty_points
     });
 
   } catch (err) {

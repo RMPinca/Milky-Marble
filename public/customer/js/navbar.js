@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initNavbarState();
   initNavbarSearch();
   initMobileBottomNav();
+  initScrollSpyNav();
 });
 
 function escapeHtml(str = '') {
@@ -569,4 +570,113 @@ function initMobileBottomNav() {
       document.body.style.overflow = '';
     });
   });
+}
+
+/**
+ * Scroll-spy: highlights the nav pill (desktop + mobile) matching whichever
+ * .page-section is currently in view. Only runs on pages that actually have
+ * the hash-linked sections (i.e. home.html) — on other pages it's a no-op
+ * and whatever active class is already in that page's markup is left alone.
+ */
+function initScrollSpyNav() {
+  const sections = Array.from(document.querySelectorAll('main.content-wrapper > .page-section[id]'));
+  if (!sections.length) return;
+
+  const navLinks = document.querySelectorAll('.nav-pill-link[data-nav]');
+  if (!navLinks.length) return;
+
+  // Recent Orders preview section shares the "orders" nav pill.
+  const sectionToNavId = (section) =>
+    section.id === 'orders-preview' ? 'orders' : section.id;
+
+  function setActiveNav(navId) {
+    navLinks.forEach((link) => {
+      link.classList.toggle('active', link.dataset.nav === navId);
+    });
+  }
+
+  function getNavbarOffset() {
+    const navbar = document.querySelector('.navbar-wrapper');
+    return (navbar ? navbar.offsetHeight : 0) + 24; // small buffer past the sticky header
+  }
+
+  // While a pill is clicked (in-page jump) or the page just loaded on a
+  // hash (cross-page link, e.g. from orders.html), scroll-based detection
+  // can't be trusted for a bit — either the browser is still animating the
+  // jump, or async content (product grids, customizer panels, etc.) is
+  // still loading in and shifting section positions out from under the
+  // browser's one-shot hash-scroll. Pause it during that window and trust
+  // the click/hash instead.
+  let suppressUntil = 0;
+  function suppressFor(ms) {
+    suppressUntil = Date.now() + ms;
+  }
+
+  navLinks.forEach((link) => {
+    const isHashLink = (link.getAttribute('href') || '').startsWith('#');
+    if (!isHashLink) return; // e.g. "Orders" links to orders.html, not an in-page jump
+
+    link.addEventListener('click', () => {
+      setActiveNav(link.dataset.nav);
+      suppressFor(700); // covers instant jumps and smooth-scroll animations
+    });
+  });
+
+  // Landed here via a hash from another page (or a fresh load with a hash
+  // already in the URL). Set the pill from the hash immediately, then
+  // re-correct the scroll position a few times as async content loads in
+  // and shifts things — the browser only auto-scrolls to the hash once,
+  // before that content exists.
+  (function syncInitialHash() {
+    const hashId = window.location.hash.replace('#', '');
+    if (!hashId) return;
+    const target = sections.find((s) => s.id === hashId);
+    if (!target) return;
+
+    setActiveNav(sectionToNavId(target));
+    suppressFor(1600);
+
+    function resync() {
+      const y = Math.max(0, target.offsetTop - getNavbarOffset() + 24);
+      if (Math.abs(window.scrollY - y) > 2) {
+        window.scrollTo({ top: y, behavior: 'auto' });
+      }
+    }
+
+    [0, 50, 150, 350, 600, 900, 1300].forEach((ms) => setTimeout(resync, ms));
+  })();
+
+  let ticking = false;
+
+  function updateActiveSection() {
+    ticking = false;
+    if (Date.now() < suppressUntil) return;
+
+    const scrollPos = window.scrollY + getNavbarOffset();
+    const atBottom = (window.innerHeight + window.scrollY) >= (document.documentElement.scrollHeight - 2);
+
+    let current = sections[0];
+    if (atBottom) {
+      current = sections[sections.length - 1];
+    } else {
+      for (const section of sections) {
+        if (section.offsetTop <= scrollPos) {
+          current = section;
+        }
+      }
+    }
+
+    setActiveNav(sectionToNavId(current));
+  }
+
+  function onScrollOrResize() {
+    if (!ticking) {
+      window.requestAnimationFrame(updateActiveSection);
+      ticking = true;
+    }
+  }
+
+  window.addEventListener('scroll', onScrollOrResize, { passive: true });
+  window.addEventListener('resize', onScrollOrResize);
+  updateActiveSection();
 }

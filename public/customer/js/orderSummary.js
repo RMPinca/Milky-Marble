@@ -3,7 +3,7 @@ let currentOrderSummaryItems = [];
 let currentSubtotal = 0.0;
 let appliedPromoDiscount = 0.0;
 let appliedLoyaltyDiscount = 0.0;
-let selectedPaymentMethod = 'Cash on Pick-Up';
+let selectedPaymentMethod = '';
 let availableLoyaltyPoints = 0.0;
 let lastPlacedOrderData = null;
 
@@ -14,7 +14,116 @@ let currentRecipient = {
 
 document.addEventListener('DOMContentLoaded', () => {
   loadRecipientInfoFromSession();
+  handlePaymongoReturn();
 });
+
+// ==========================================
+// HANDLE RETURN FROM PAYMONGO QR PH CHECKOUT
+// ==========================================
+async function handlePaymongoReturn() {
+  const params = new URLSearchParams(window.location.search);
+  const paymentState = params.get('payment');
+  const orderId = params.get('order_id');
+  if (!paymentState || !orderId) return;
+
+  // Clean the URL so a refresh doesn't re-trigger this
+  const cleanUrl = window.location.pathname;
+  window.history.replaceState({}, document.title, cleanUrl);
+
+  if (paymentState === 'cancelled') {
+    if (typeof Swal !== 'undefined') {
+      Swal.fire({
+        icon: 'info',
+        title: 'Payment Cancelled',
+        text: 'Your QR Ph payment was cancelled. Your order is saved as Pending Payment — you can retry from your Orders page.'
+      });
+    }
+    return;
+  }
+
+  if (paymentState !== 'success') return;
+
+  if (typeof Swal !== 'undefined') {
+    Swal.fire({
+      title: 'Confirming your payment...',
+      text: 'Please wait while we verify your QR Ph payment with PayMongo.',
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading()
+    });
+  }
+
+  // Poll briefly — the webhook is usually instant, but we retry in case it lags.
+  let order = null;
+  for (let attempt = 0; attempt < 6; attempt++) {
+    try {
+      const res = await fetch(`/api/payments/paymongo/status/${orderId}`);
+      const data = await res.json();
+      if (res.ok && data.status === 'success') {
+        order = data.order;
+        if (order.status === 'PAID_VERIFIED') break;
+      }
+    } catch (err) {
+      console.warn('Payment status check failed:', err);
+    }
+    await new Promise(r => setTimeout(r, 1500));
+  }
+
+  if (order && order.status === 'PAID_VERIFIED') {
+    lastPlacedOrderData = {
+      ...order,
+      items: (order.order_items || []).map(it => ({
+        title: it.item_label,
+        quantity: it.quantity,
+        unit_price: it.unit_price
+      })),
+      total_amount: order.total_amount,
+      pickup_date: (order.pickup_instructions || '').split('|')[0].replace('Pick-up:', '').trim()
+    };
+
+    if (typeof loadRecentOrders === 'function') loadRecentOrders();
+
+    if (typeof Swal !== 'undefined') {
+      Swal.fire({
+        target: document.body,
+        icon: 'success',
+        title: 'Payment Successful!',
+        html: `
+          <p style="color: #7C4F38; font-size: 14px; margin-bottom: 8px;">Order No: <strong>${order.order_number}</strong></p>
+          <div style="background: #FFF5F4; border-radius: 12px; padding: 10px; margin: 10px 0; font-weight: 800; color: #594A42;">
+            🎉 Paid via PayMongo QR Ph — Total: ₱ ${Number(order.total_amount).toFixed(2)}
+          </div>
+          <button type="button" class="btn-download-receipt" onclick="downloadReceiptPDF()" style="margin-top: 10px; padding: 8px 18px; font-weight: 800; border-radius: 99px; border: 1.5px solid #FCE1DD; background: #FFF; color: #F48A8E; cursor: pointer;">
+            <i class="fa-solid fa-file-arrow-down"></i> Download Receipt (PDF)
+          </button>
+        `,
+        confirmButtonText: 'Got It!',
+        customClass: {
+          container: 'mm-order-swal-container',
+          popup: 'custom-swal-popup',
+          title: 'custom-swal-title',
+          htmlContainer: 'custom-swal-html',
+          confirmButton: 'custom-swal-confirm'
+        },
+        buttonsStyling: false
+      });
+    }
+  } else if (typeof Swal !== 'undefined') {
+    Swal.fire({
+      target: document.body,
+      icon: 'warning',
+      title: 'Still Processing',
+      text: 'We could not confirm your payment yet. If GCash/your bank already deducted the amount, check your Orders page shortly — it updates automatically once confirmed.',
+      customClass: {
+        container: 'mm-order-swal-container',
+        popup: 'custom-swal-popup',
+        title: 'custom-swal-title',
+        htmlContainer: 'custom-swal-html',
+        confirmButton: 'custom-swal-confirm'
+      },
+      buttonsStyling: false
+    });
+  }
+}
 
 function loadRecipientInfoFromSession() {
   const localUser = JSON.parse(localStorage.getItem('mm_user') || '{}');
@@ -51,14 +160,16 @@ window.renderOrderSummaryModal = async function(items = []) {
   currentOrderSummaryItems = items;
   appliedPromoDiscount = 0.0;
   appliedLoyaltyDiscount = 0.0;
-  selectedPaymentMethod = 'Cash on Pick-Up';
+  selectedPaymentMethod = '';
 
   loadRecipientInfoFromSession();
 
-  // Reset payment method buttons
+  // Reset payment method buttons - no default selection; customer must choose
   document.querySelectorAll('.payment-method-pill').forEach(btn => {
-    btn.classList.toggle('active', btn.innerText.trim() === 'Cash on Pick-Up');
+    btn.classList.remove('active');
   });
+  const paymentReq = document.getElementById('paymentRequiredMsg');
+  if (paymentReq) paymentReq.style.display = 'none';
 
   // Reset promo code inputs
   const promoInput = document.getElementById('promoCodeInput');
@@ -201,7 +312,10 @@ function updateSummaryTotals() {
 window.selectPaymentMethod = function(btnElement) {
   document.querySelectorAll('.payment-method-pill').forEach(b => b.classList.remove('active'));
   btnElement.classList.add('active');
-  selectedPaymentMethod = btnElement.innerText.trim();
+  selectedPaymentMethod = btnElement.getAttribute('data-payment-value') || btnElement.innerText.trim();
+
+  const paymentReq = document.getElementById('paymentRequiredMsg');
+  if (paymentReq) paymentReq.style.display = 'none';
 };
 
 function setNextDefaultPickupDate() {
@@ -429,6 +543,15 @@ window.confirmPlaceOrder = async function() {
     return;
   }
 
+  // Payment method is only required on pages that actually show the pill picker
+  // (orders.html uses a stripped-down summary modal without it).
+  const paymentPills = document.querySelectorAll('.payment-method-pill');
+  if (paymentPills.length > 0 && !selectedPaymentMethod) {
+    const paymentReq = document.getElementById('paymentRequiredMsg');
+    if (paymentReq) paymentReq.style.display = 'block';
+    return;
+  }
+
   const localUser = JSON.parse(localStorage.getItem('mm_user') || '{}');
   const customerId = localUser.customer_id || 11;
   const isPointsToggled = document.getElementById('toggleUseLoyaltyPoints')?.checked || false;
@@ -440,6 +563,11 @@ window.confirmPlaceOrder = async function() {
   const isCustomCup = currentOrderSummaryItems.some(it => it.is_custom);
   const orderTypeVal = isCustomCup ? 'custom_build' : 'preset';
 
+  // Pages without the pill picker (e.g. orders.html's slim summary modal) keep
+  // the historical Cash on Pick-Up default since there's no UI to choose there.
+  const paymentMethodForOrder = selectedPaymentMethod || 'Cash on Pick-Up';
+  selectedPaymentMethod = paymentMethodForOrder; // keep in sync for the receipt renderer
+
   const payload = {
     customer_id: customerId,
     items: currentOrderSummaryItems,
@@ -448,7 +576,7 @@ window.confirmPlaceOrder = async function() {
     points_used: pointsToUse,
     order_type: orderTypeVal,
     total_amount: finalPayableTotal,
-    payment_method: selectedPaymentMethod,
+    payment_method: paymentMethodForOrder,
     pickup_date: pickupInput.value,
     pickup_instructions: `Pick-up: ${pickupInput.value}`
   };
@@ -469,6 +597,67 @@ window.confirmPlaceOrder = async function() {
     const data = await res.json();
 
     if (res.ok && data.status === 'success') {
+      // For E-Wallet (PayMongo QR Ph), the order is created as PENDING_PAYMENT.
+      // Redirect the customer to the PayMongo-hosted QR Ph checkout page now;
+      // the order only becomes PAID_VERIFIED once PayMongo confirms payment
+      // (handled by handlePaymongoReturn() + the webhook on return).
+      if (paymentMethodForOrder === 'E-Wallet') {
+        try {
+          const checkoutRes = await fetch('/api/payments/paymongo/create-checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ order_id: data.order.id })
+          });
+          const checkoutData = await checkoutRes.json();
+
+          if (checkoutRes.ok && checkoutData.status === 'success' && checkoutData.checkout_url) {
+            window.location.href = checkoutData.checkout_url;
+            return; // leaving the page — nothing further to do here
+          }
+
+          if (typeof Swal !== 'undefined') {
+            Swal.fire({
+              target: document.body,
+              icon: 'error',
+              title: 'Could Not Start QR Ph Payment',
+              text: checkoutData.message || 'Your order was saved as Pending Payment. Please try paying again from your Orders page.',
+              confirmButtonText: 'OK',
+              customClass: {
+                container: 'mm-order-swal-container',
+                popup: 'custom-swal-popup',
+                title: 'custom-swal-title',
+                htmlContainer: 'custom-swal-html',
+                confirmButton: 'custom-swal-confirm'
+              },
+              buttonsStyling: false
+            });
+          }
+          closeOrderSummaryModal();
+          return;
+        } catch (checkoutErr) {
+          console.error('PayMongo checkout error:', checkoutErr);
+          if (typeof Swal !== 'undefined') {
+            Swal.fire({
+              target: document.body,
+              icon: 'error',
+              title: 'Connection Error',
+              text: 'Could not reach the payment gateway. Your order was saved as Pending Payment.',
+              confirmButtonText: 'OK',
+              customClass: {
+                container: 'mm-order-swal-container',
+                popup: 'custom-swal-popup',
+                title: 'custom-swal-title',
+                htmlContainer: 'custom-swal-html',
+                confirmButton: 'custom-swal-confirm'
+              },
+              buttonsStyling: false
+            });
+          }
+          closeOrderSummaryModal();
+          return;
+        }
+      }
+
       closeOrderSummaryModal();
 
       lastPlacedOrderData = {
@@ -495,6 +684,7 @@ window.confirmPlaceOrder = async function() {
 
       if (typeof Swal !== 'undefined') {
         Swal.fire({
+          target: document.body,
           icon: 'success',
           title: 'Order Confirmed!',
           html: `
@@ -508,15 +698,32 @@ window.confirmPlaceOrder = async function() {
             </button>
           `,
           confirmButtonText: 'Got It!',
-          confirmButtonColor: '#594A42'
+          customClass: {
+            container: 'mm-order-swal-container',
+            popup: 'custom-swal-popup',
+            title: 'custom-swal-title',
+            htmlContainer: 'custom-swal-html',
+            confirmButton: 'custom-swal-confirm'
+          },
+          buttonsStyling: false
         });
       }
     } else {
       if (typeof Swal !== 'undefined') {
         Swal.fire({
+          target: document.body,
           icon: 'error',
           title: 'Failed to Place Order',
-          text: data.message || 'Could not save your order.'
+          text: data.message || 'Could not save your order.',
+          confirmButtonText: 'OK',
+          customClass: {
+            container: 'mm-order-swal-container',
+            popup: 'custom-swal-popup',
+            title: 'custom-swal-title',
+            htmlContainer: 'custom-swal-html',
+            confirmButton: 'custom-swal-confirm'
+          },
+          buttonsStyling: false
         });
       }
     }
@@ -524,9 +731,19 @@ window.confirmPlaceOrder = async function() {
     console.error('Order error:', err);
     if (typeof Swal !== 'undefined') {
       Swal.fire({
+        target: document.body,
         icon: 'error',
         title: 'Connection Error',
-        text: 'Could not connect to the server.'
+        text: 'Could not connect to the server.',
+        confirmButtonText: 'OK',
+        customClass: {
+          container: 'mm-order-swal-container',
+          popup: 'custom-swal-popup',
+          title: 'custom-swal-title',
+          htmlContainer: 'custom-swal-html',
+          confirmButton: 'custom-swal-confirm'
+        },
+        buttonsStyling: false
       });
     }
   } finally {

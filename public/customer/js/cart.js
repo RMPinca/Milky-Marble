@@ -329,7 +329,7 @@ function calculateCartTotals() {
   }
 }
 
-// Proceed to checkout route[cite: 7]
+// Proceed to checkout: open the Order Summary modal on this same page[cite: 7]
 window.openOrderSummaryFromCart = function() {
   const selectedCount = parseInt(document.getElementById('selectedCountText').textContent) || 0;
   if (selectedCount === 0) {
@@ -350,5 +350,17 @@ window.openOrderSummaryFromCart = function() {
     return;
   }
 
-  window.location.href = 'checkout.html?from_cart=true';
+  const selectedIds = Array.from(document.querySelectorAll('.cart-item-checkbox'))
+    .filter(cb => cb.checked)
+    .map(cb => {
+      const wrapper = cb.closest('.cart-item-wrapper');
+      return wrapper ? wrapper.getAttribute('data-item-id') : null;
+    })
+    .filter(Boolean);
+
+  const selectedItems = loadedCartItems.filter(it => selectedIds.includes(String(it.id)));
+
+  if (typeof renderOrderSummaryModal === 'function') {
+    renderOrderSummaryModal(selectedItems);
+  }
 };
