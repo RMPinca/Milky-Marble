@@ -1,6 +1,6 @@
-// js/home.js - Milky Marble Customer Portal Logic
+// js/home.js - Milky Marble Customer Portal Logic// [cite: 8]
 
-const PRESET_SIGNATURES = [
+const PRESET_SIGNATURES = [// [cite: 8]
   {
     id: 1,
     title: "Chocolatey Coffee\nNoodly Jelly",
@@ -49,10 +49,10 @@ const PRESET_SIGNATURES = [
     price_12oz: 19.00,
     rating: "0.0"
   }
-];
+];// [cite: 8]
 
-const AVAILABLE_TOPPINGS = ['Cheese', 'Tapioca', 'Marshmallow', 'Nuts', 'Assorted Sprinkles', 'Choco Sprinkles', 'Choco Chips'];
-const TOPPING_PRICES = {
+const AVAILABLE_TOPPINGS = ['Cheese', 'Tapioca', 'Marshmallow', 'Nuts', 'Assorted Sprinkles', 'Choco Sprinkles', 'Choco Chips'];// [cite: 8]
+const TOPPING_PRICES = {// [cite: 8]
   'Cheese': 2.00,
   'Tapioca': 2.00,
   'Marshmallow': 2.00,
@@ -61,9 +61,9 @@ const TOPPING_PRICES = {
   'Choco Sprinkles': 2.00,
   'Choco Chips': 5.00,
   'Condensed Milk': 5.00
-};
+};// [cite: 8]
 
-const STAGE_CHOICES = {
+const STAGE_CHOICES = {// [cite: 8]
   flavor: [
     { id: 'Strawberry', label: 'Strawberry' },
     { id: 'Pandan', label: 'Pandan' },
@@ -74,12 +74,12 @@ const STAGE_CHOICES = {
     { id: 'Cube', label: 'Cube' },
     { id: 'Whole', label: 'Whole' }
   ]
-};
+};// [cite: 8]
 
-const STAGES = ['cup', 'flavor', 'jelly', 'toppings', 'addons'];
-let currentStageIndex = 0;
+const STAGES = ['cup', 'flavor', 'jelly', 'toppings', 'addons'];// [cite: 8]
+let currentStageIndex = 0;// [cite: 8]
 
-let customConfig = {
+let customConfig = {// [cite: 8]
   size: '12oz',
   flavor: 'Pandan',
   jelly: 'Cube',
@@ -88,52 +88,61 @@ let customConfig = {
   addonsMap: {},
   utensils: 'No Spoon',
   basePrice: 19.00
-};
+};// [cite: 8]
 
-let currentModalDrink = null;
-let currentModalSize = null;
-let currentModalQty = 1;
-let activeModalAllReviews = [];
+let currentModalDrink = null;// [cite: 8]
+let currentModalSize = null;// [cite: 8]
+let currentModalQty = 1;// [cite: 8]
+let activeModalAllReviews = [];// [cite: 8]
 
-function showSweetAlert(options) {
-  if (typeof Swal === 'undefined') return Promise.resolve({ isConfirmed: false });
-  return Swal.fire({
-    target: document.body,
-    customClass: {
-      container: 'mm-swal-container-top',
-      popup: 'mm-swal-popup',
-      title: 'mm-swal-title',
-      htmlContainer: 'mm-swal-html',
-      actions: 'mm-swal-actions',
-      confirmButton: 'mm-swal-confirm-btn',
-      cancelButton: 'mm-swal-cancel-btn'
-    },
-    buttonsStyling: false,
-    ...options
-  });
+function getGuestSessionId() {// [cite: 8]
+  let sid = localStorage.getItem('mm_guest_session_id');// [cite: 8]
+  if (!sid) {// [cite: 8]
+    sid = 'guest_' + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);// [cite: 8]
+    localStorage.setItem('mm_guest_session_id', sid);// [cite: 8]
+  }
+  return sid;// [cite: 8]
 }
 
-const CartAlert = {
-  showModal: function({
-    title = 'Cup',
-    size = '12oz',
-    image = '',
-    flavor_img = '',
-    toppings_img = '',
-    cup_img = '',
-    accent_color = '#F48A8E',
-    onCheckout = null
-  } = {}) {
-    const resolvedCup = cup_img || (size === '8oz' ? 'images/Layer 3/Small Cup.png' : 'images/Layer 3/Large Cup.png');
-    let thumbHTML = '';
+function showSweetAlert(options) {// [cite: 8]
+  if (typeof Swal === 'undefined') return Promise.resolve({ isConfirmed: false });// [cite: 8]
+  return Swal.fire({// [cite: 8]
+    target: document.body,// [cite: 8]
+    customClass: {// [cite: 8]
+      container: 'mm-swal-container-top',// [cite: 8]
+      popup: 'mm-swal-popup',// [cite: 8]
+      title: 'mm-swal-title',// [cite: 8]
+      htmlContainer: 'mm-swal-html',// [cite: 8]
+      actions: 'mm-swal-actions',// [cite: 8]
+      confirmButton: 'mm-swal-confirm-btn',// [cite: 8]
+      cancelButton: 'mm-swal-cancel-btn'// [cite: 8]
+    },// [cite: 8]
+    buttonsStyling: false,// [cite: 8]
+    ...options// [cite: 8]
+  });// [cite: 8]
+}
 
-    if (image) {
+const CartAlert = {// [cite: 8]
+  showModal: function ({// [cite: 8]
+    title = 'Cup',// [cite: 8]
+    size = '12oz',// [cite: 8]
+    image = '',// [cite: 8]
+    flavor_img = '',// [cite: 8]
+    toppings_img = '',// [cite: 8]
+    cup_img = '',// [cite: 8]
+    accent_color = '#F48A8E',// [cite: 8]
+    onCheckout = null// [cite: 8]
+  } = {}) {// [cite: 8]
+    const resolvedCup = cup_img || (size === '8oz' ? 'images/Layer 3/Small Cup.png' : 'images/Layer 3/Large Cup.png');// [cite: 8]
+    let thumbHTML = '';// [cite: 8]
+
+    if (image) {// [cite: 8]
       thumbHTML = `
         <div class="mm-swal-thumb-box" style="background: ${accent_color}22;">
           <img src="${image}" class="mm-swal-img" alt="Drink">
         </div>
-      `;
-    } else if (flavor_img || resolvedCup) {
+      `;// [cite: 8]
+    } else if (flavor_img || resolvedCup) {// [cite: 8]
       thumbHTML = `
         <div class="mm-swal-thumb-box" style="background: ${accent_color}22;">
           <div class="composite-cart-thumb notif-thumb-composite">
@@ -142,43 +151,43 @@ const CartAlert = {
             <img src="${resolvedCup}" class="cart-layer-cup" alt="Cup">
           </div>
         </div>
-      `;
+      `;// [cite: 8]
     }
 
-    return showSweetAlert({
-      icon: 'success',
-      title: 'Added to Sweet Bag!',
+    return showSweetAlert({// [cite: 8]
+      icon: 'success',// [cite: 8]
+      title: 'Added to Sweet Bag!',// [cite: 8]
       html: `
         ${thumbHTML}
         <div class="mm-swal-item-name">${size} ${title}</div>
         <p class="mm-swal-item-sub">Ready to pop the straw or craving more treats?</p>
-      `,
-      showCancelButton: true,
-      confirmButtonText: 'View Cart',
-      cancelButtonText: 'Keep Browsing',
-      reverseButtons: true
-    }).then((result) => {
-      if (result.isConfirmed) {
-        if (typeof onCheckout === 'function') {
-          onCheckout();
-        } else {
-          window.location.href = 'cart.html';
+      `,// [cite: 8]
+      showCancelButton: true,// [cite: 8]
+      confirmButtonText: 'View Cart',// [cite: 8]
+      cancelButtonText: 'Keep Browsing',// [cite: 8]
+      reverseButtons: true// [cite: 8]
+    }).then((result) => {// [cite: 8]
+      if (result.isConfirmed) {// [cite: 8]
+        if (typeof onCheckout === 'function') {// [cite: 8]
+          onCheckout();// [cite: 8]
+        } else {// [cite: 8]
+          window.location.href = 'cart.html';// [cite: 8]
         }
       }
-    });
+    });// [cite: 8]
   }
-};
+};// [cite: 8]
 
 // ==========================================
 // PRESET SIGNATURE DRINKS
 // ==========================================
-function renderSignatureDrinks() {
-  const container = document.getElementById('productsGridContainer');
-  if (!container) return;
+function renderSignatureDrinks() {// [cite: 8]
+  const container = document.getElementById('productsGridContainer');// [cite: 8]
+  if (!container) return;// [cite: 8]
 
-  container.innerHTML = PRESET_SIGNATURES.map((drink) => {
-    const searchKeywords = (drink.title + ' ' + drink.flavor + ' ' + drink.variation + ' ' + drink.toppings.join(' ')).toLowerCase();
-    const encodedData = encodeURIComponent(JSON.stringify(drink));
+  container.innerHTML = PRESET_SIGNATURES.map((drink) => {// [cite: 8]
+    const searchKeywords = (drink.title + ' ' + drink.flavor + ' ' + drink.variation + ' ' + drink.toppings.join(' ')).toLowerCase();// [cite: 8]
+    const encodedData = encodeURIComponent(JSON.stringify(drink));// [cite: 8]
 
     return `
       <div class="product-card" data-search-keywords="${searchKeywords}" onclick="openProductModal('${encodedData}')">
@@ -209,120 +218,120 @@ function renderSignatureDrinks() {
           </div>
         </div>
       </div>
-    `;
-  }).join('');
+    `;// [cite: 8]
+  }).join('');// [cite: 8]
 }
 
-async function loadLiveRatingsSummary() {
-  try {
-    const res = await fetch('/api/ratings/summary');
-    const data = await res.json();
+async function loadLiveRatingsSummary() {// [cite: 8]
+  try {// [cite: 8]
+    const res = await fetch('/api/ratings/summary');// [cite: 8]
+    const data = await res.json();// [cite: 8]
 
-    if (res.ok && data.status === 'success') {
-      const ratingsMap = data.ratings || {};
+    if (res.ok && data.status === 'success') {// [cite: 8]
+      const ratingsMap = data.ratings || {};// [cite: 8]
 
-      PRESET_SIGNATURES.forEach(drink => {
-        const cleanKey = drink.title.replace(/\r?\n|\r/g, ' ').trim().toLowerCase();
-        let matchedScore = null;
+      PRESET_SIGNATURES.forEach(drink => {// [cite: 8]
+        const cleanKey = drink.title.replace(/\r?\n|\r/g, ' ').trim().toLowerCase();// [cite: 8]
+        let matchedScore = null;// [cite: 8]
 
-        if (ratingsMap[cleanKey] !== undefined) {
-          matchedScore = ratingsMap[cleanKey];
-        } else {
-          const foundKey = Object.keys(ratingsMap).find(k => cleanKey.includes(k) || k.includes(cleanKey));
-          if (foundKey) {
-            matchedScore = ratingsMap[foundKey];
+        if (ratingsMap[cleanKey] !== undefined) {// [cite: 8]
+          matchedScore = ratingsMap[cleanKey];// [cite: 8]
+        } else {// [cite: 8]
+          const foundKey = Object.keys(ratingsMap).find(k => cleanKey.includes(k) || k.includes(cleanKey));// [cite: 8]
+          if (foundKey) {// [cite: 8]
+            matchedScore = ratingsMap[foundKey];// [cite: 8]
           }
         }
 
-        drink.rating = (matchedScore !== null && matchedScore > 0) ? matchedScore.toFixed(1) : "0.0";
+        drink.rating = (matchedScore !== null && matchedScore > 0) ? matchedScore.toFixed(1) : "0.0";// [cite: 8]
 
-        const cardRatingEl = document.getElementById(`card-rating-${drink.id}`);
-        if (cardRatingEl) {
-          cardRatingEl.innerText = drink.rating;
+        const cardRatingEl = document.getElementById(`card-rating-${drink.id}`);// [cite: 8]
+        if (cardRatingEl) {// [cite: 8]
+          cardRatingEl.innerText = drink.rating;// [cite: 8]
         }
-      });
+      });// [cite: 8]
     }
-  } catch (err) {
-    console.warn('Could not load ratings summary:', err);
+  } catch (err) {// [cite: 8]
+    console.warn('Could not load ratings summary:', err);// [cite: 8]
   }
 }
 
-window.openProductModal = function(encodedData) {
-  const drink = JSON.parse(decodeURIComponent(encodedData));
-  currentModalDrink = drink;
-  currentModalSize = null;
-  currentModalQty = 1;
+window.openProductModal = function (encodedData) {// [cite: 8]
+  const drink = JSON.parse(decodeURIComponent(encodedData));// [cite: 8]
+  currentModalDrink = drink;// [cite: 8]
+  currentModalSize = null;// [cite: 8]
+  currentModalQty = 1;// [cite: 8]
 
-  const sizeErr = document.getElementById('modalSizeRequiredMsg');
-  if (sizeErr) sizeErr.style.display = 'none';
+  const sizeErr = document.getElementById('modalSizeRequiredMsg');// [cite: 8]
+  if (sizeErr) sizeErr.style.display = 'none';// [cite: 8]
 
-  document.getElementById('modalDrinkImg').src = drink.image;
-  document.getElementById('modalDrinkBox').style.setProperty('--thumb-accent', drink.accent_color || '#F48A8E');
-  document.getElementById('modalDrinkTitle').innerText = drink.title.replace('\n', ' ');
-  document.getElementById('modalDrinkRating').innerText = drink.rating;
-  document.getElementById('modalDrinkFlavor').innerText = drink.flavor;
-  document.getElementById('modalDrinkVariation').innerText = drink.variation;
+  document.getElementById('modalDrinkImg').src = drink.image;// [cite: 8]
+  document.getElementById('modalDrinkBox').style.setProperty('--thumb-accent', drink.accent_color || '#F48A8E');// [cite: 8]
+  document.getElementById('modalDrinkTitle').innerText = drink.title.replace('\n', ' ');// [cite: 8]
+  document.getElementById('modalDrinkRating').innerText = drink.rating;// [cite: 8]
+  document.getElementById('modalDrinkFlavor').innerText = drink.flavor;// [cite: 8]
+  document.getElementById('modalDrinkVariation').innerText = drink.variation;// [cite: 8]
 
-  const toppingsList = document.getElementById('modalDrinkToppings');
-  toppingsList.innerHTML = drink.toppings.map(t => `<li>${t}</li>`).join('');
+  const toppingsList = document.getElementById('modalDrinkToppings');// [cite: 8]
+  toppingsList.innerHTML = drink.toppings.map(t => `<li>${t}</li>`).join('');// [cite: 8]
 
-  document.querySelectorAll('.size-pill').forEach(btn => btn.classList.remove('active'));
-  document.getElementById('modalQtyDisplay').innerText = currentModalQty;
+  document.querySelectorAll('.size-pill').forEach(btn => btn.classList.remove('active'));// [cite: 8]
+  document.getElementById('modalQtyDisplay').innerText = currentModalQty;// [cite: 8]
 
-  updateModalPrice();
+  updateModalPrice();// [cite: 8]
 
-  fetchLiveProductReviews(drink.title.replace('\n', ' '));
+  fetchLiveProductReviews(drink.title.replace('\n', ' '));// [cite: 8]
 
-  const modal = document.getElementById('productModal');
-  modal.classList.add('active');
-  document.body.style.overflow = 'hidden';
+  const modal = document.getElementById('productModal');// [cite: 8]
+  modal.classList.add('active');// [cite: 8]
+  document.body.style.overflow = 'hidden';// [cite: 8]
 };
 
-window.closeProductModal = function() {
-  const modal = document.getElementById('productModal');
-  if (modal) modal.classList.remove('active');
-  document.body.style.overflow = '';
+window.closeProductModal = function () {// [cite: 8]
+  const modal = document.getElementById('productModal');// [cite: 8]
+  if (modal) modal.classList.remove('active');// [cite: 8]
+  document.body.style.overflow = '';// [cite: 8]
 };
 
-window.selectModalSize = function(size, btn) {
-  currentModalSize = size;
-  document.querySelectorAll('.size-pill').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+window.selectModalSize = function (size, btn) {// [cite: 8]
+  currentModalSize = size;// [cite: 8]
+  document.querySelectorAll('.size-pill').forEach(b => b.classList.remove('active'));// [cite: 8]
+  btn.classList.add('active');// [cite: 8]
 
-  const sizeErr = document.getElementById('modalSizeRequiredMsg');
-  if (sizeErr) sizeErr.style.display = 'none';
+  const sizeErr = document.getElementById('modalSizeRequiredMsg');// [cite: 8]
+  if (sizeErr) sizeErr.style.display = 'none';// [cite: 8]
 
-  updateModalPrice();
+  updateModalPrice();// [cite: 8]
 };
 
-window.changeModalQty = function(delta) {
-  currentModalQty = Math.max(1, currentModalQty + delta);
-  document.getElementById('modalQtyDisplay').innerText = currentModalQty;
-  updateModalPrice();
+window.changeModalQty = function (delta) {// [cite: 8]
+  currentModalQty = Math.max(1, currentModalQty + delta);// [cite: 8]
+  document.getElementById('modalQtyDisplay').innerText = currentModalQty;// [cite: 8]
+  updateModalPrice();// [cite: 8]
 };
 
-function updateModalPrice() {
-  if (!currentModalDrink) return;
-  if (!currentModalSize) {
-    document.getElementById('modalDrinkPrice').innerText = `₱ ${currentModalDrink.price_8oz.toFixed(2)} - ₱ ${currentModalDrink.price_12oz.toFixed(2)}`;
-    return;
+function updateModalPrice() {// [cite: 8]
+  if (!currentModalDrink) return;// [cite: 8]
+  if (!currentModalSize) {// [cite: 8]
+    document.getElementById('modalDrinkPrice').innerText = `₱ ${currentModalDrink.price_8oz.toFixed(2)} - ₱ ${currentModalDrink.price_12oz.toFixed(2)}`;// [cite: 8]
+    return;// [cite: 8]
   }
-  const unit = currentModalSize === '12oz' ? currentModalDrink.price_12oz : currentModalDrink.price_8oz;
-  document.getElementById('modalDrinkPrice').innerText = `₱ ${(unit * currentModalQty).toFixed(2)}`;
+  const unit = currentModalSize === '12oz' ? currentModalDrink.price_12oz : currentModalDrink.price_8oz;// [cite: 8]
+  document.getElementById('modalDrinkPrice').innerText = `₱ ${(unit * currentModalQty).toFixed(2)}`;// [cite: 8]
 }
 
-window.addModalItemToCart = async function() {
-  if (!currentModalDrink) return;
-  if (!currentModalSize) {
-    const err = document.getElementById('modalSizeRequiredMsg');
-    if (err) err.style.display = 'block';
-    return;
+window.addModalItemToCart = async function () {// [cite: 8]
+  if (!currentModalDrink) return;// [cite: 8]
+  if (!currentModalSize) {// [cite: 8]
+    const err = document.getElementById('modalSizeRequiredMsg');// [cite: 8]
+    if (err) err.style.display = 'block';// [cite: 8]
+    return;// [cite: 8]
   }
 
-  const unitPrice = currentModalSize === '12oz' ? currentModalDrink.price_12oz : currentModalDrink.price_8oz;
-  const titleClean = currentModalDrink.title.replace('\n', ' ');
+  const unitPrice = currentModalSize === '12oz' ? currentModalDrink.price_12oz : currentModalDrink.price_8oz;// [cite: 8]
+  const titleClean = currentModalDrink.title.replace('\n', ' ');// [cite: 8]
 
-  const payload = {
+  const payload = {// [cite: 8]
     title: titleClean,
     size: currentModalSize,
     flavor: currentModalDrink.flavor,
@@ -333,57 +342,58 @@ window.addModalItemToCart = async function() {
     quantity: currentModalQty,
     accent_color: currentModalDrink.accent_color,
     image: currentModalDrink.image
-  };
+  };// [cite: 8]
 
-  const user = JSON.parse(localStorage.getItem('mm_user') || '{}');
+  const user = JSON.parse(localStorage.getItem('mm_user') || '{}');// [cite: 8]
 
-  try {
-    const res = await fetch('/api/cart', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        action: 'add', 
+  try {// [cite: 8]
+    const res = await fetch('/api/cart', {// [cite: 8]
+      method: 'POST',// [cite: 8]
+      headers: { 'Content-Type': 'application/json' },// [cite: 8]
+      body: JSON.stringify({// [cite: 8]
+        action: 'add',
         item: payload,
-        customer_id: user.customer_id || 11
-      })
-    });
-    if (!res.ok) throw new Error('Failed to add to cart');
-  } catch (e) {
-    console.error('Add to cart error:', e);
+        customer_id: user.customer_id || null,
+        session_id: !user.customer_id ? getGuestSessionId() : null
+      })// [cite: 8]
+    });// [cite: 8]
+    if (!res.ok) throw new Error('Failed to add to cart');// [cite: 8]
+  } catch (e) {// [cite: 8]
+    console.error('Add to cart error:', e);// [cite: 8]
   }
 
-  closeProductModal();
-  CartAlert.showModal({
+  closeProductModal();// [cite: 8]
+  CartAlert.showModal({// [cite: 8]
     title: payload.title,
     size: payload.size,
     image: payload.image,
     accent_color: payload.accent_color
-  });
-  updateCartCount();
+  });// [cite: 8]
+  updateCartCount();// [cite: 8]
 };
 
-window.proceedToOrderSummary = function() {
-  if (!currentModalDrink) return;
-  if (!currentModalSize) {
-    const err = document.getElementById('modalSizeRequiredMsg');
-    if (err) {
-      err.style.display = 'block';
-      err.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+window.proceedToOrderSummary = function () {// [cite: 8]
+  if (!currentModalDrink) return;// [cite: 8]
+  if (!currentModalSize) {// [cite: 8]
+    const err = document.getElementById('modalSizeRequiredMsg');// [cite: 8]
+    if (err) {// [cite: 8]
+      err.style.display = 'block';// [cite: 8]
+      err.scrollIntoView({ behavior: 'smooth', block: 'nearest' });// [cite: 8]
     }
-    return;
+    return;// [cite: 8]
   }
 
-  closeProductModal();
+  closeProductModal();// [cite: 8]
 
-  const unitPrice = currentModalSize === '12oz' 
-    ? (currentModalDrink.price_12oz || 19.00) 
-    : (currentModalDrink.price_8oz || 15.00);
+  const unitPrice = currentModalSize === '12oz'// [cite: 8]
+    ? (currentModalDrink.price_12oz || 19.00)// [cite: 8]
+    : (currentModalDrink.price_8oz || 15.00);// [cite: 8]
 
-  const resolvedCup = (currentModalSize === '8oz') 
-    ? 'images/Layer 3/Small Cup.png' 
-    : 'images/Layer 3/Large Cup.png';
+  const resolvedCup = (currentModalSize === '8oz')// [cite: 8]
+    ? 'images/Layer 3/Small Cup.png'// [cite: 8]
+    : 'images/Layer 3/Large Cup.png';// [cite: 8]
 
-  const items = [{
+  const items = [{// [cite: 8]
     title: currentModalDrink.title.replace('\n', ' '),
     size: currentModalSize,
     is_custom: false,
@@ -396,116 +406,116 @@ window.proceedToOrderSummary = function() {
     addons: '',
     unit_price: unitPrice,
     quantity: currentModalQty
-  }];
+  }];// [cite: 8]
 
-  if (typeof renderOrderSummaryModal === 'function') {
-    renderOrderSummaryModal(items);
+  if (typeof renderOrderSummaryModal === 'function') {// [cite: 8]
+    renderOrderSummaryModal(items);// [cite: 8]
   }
 };
 
 // ==========================================
 // LIVE RATINGS & REVIEWS ENGINE
 // ==========================================
-function fetchLiveProductReviews(title) {
-  const listEl = document.getElementById('modalReviewsList');
-  if (!listEl) return;
-  
-  listEl.innerHTML = '<div style="padding: 20px; color: #7C4F38; text-align: center;"><i class="fa-solid fa-spinner fa-spin"></i> Loading sweet reviews...</div>';
+function fetchLiveProductReviews(title) {// [cite: 8]
+  const listEl = document.getElementById('modalReviewsList');// [cite: 8]
+  if (!listEl) return;// [cite: 8]
 
-  fetch('/api/ratings?title=' + encodeURIComponent(title))
-    .then(res => res.json())
-    .then(data => {
-      if (data.status === 'success') {
-        activeModalAllReviews = data.reviews || [];
-        const count = data.review_count || activeModalAllReviews.length;
-        const score = parseFloat(data.average_score) || 0.0;
+  listEl.innerHTML = '<div style="padding: 20px; color: #7C4F38; text-align: center;"><i class="fa-solid fa-spinner fa-spin"></i> Loading sweet reviews...</div>';// [cite: 8]
 
-        const displayScore = (count > 0 && score > 0) ? score.toFixed(1) : "0.0";
-        document.getElementById('modalReviewScore').innerText = displayScore;
-        document.getElementById('modalDrinkRating').innerText = displayScore;
+  fetch('/api/ratings?title=' + encodeURIComponent(title))// [cite: 8]
+    .then(res => res.json())// [cite: 8]
+    .then(data => {// [cite: 8]
+      if (data.status === 'success') {// [cite: 8]
+        activeModalAllReviews = data.reviews || [];// [cite: 8]
+        const count = data.review_count || activeModalAllReviews.length;// [cite: 8]
+        const score = parseFloat(data.average_score) || 0.0;// [cite: 8]
 
-        renderReviewStarsHeader(parseFloat(displayScore));
-        renderFilteredReviewCards(activeModalAllReviews);
-      } else {
-        listEl.innerHTML = '<div style="padding: 20px; color: #888; text-align: center;">No reviews available.</div>';
+        const displayScore = (count > 0 && score > 0) ? score.toFixed(1) : "0.0";// [cite: 8]
+        document.getElementById('modalReviewScore').innerText = displayScore;// [cite: 8]
+        document.getElementById('modalDrinkRating').innerText = displayScore;// [cite: 8]
+
+        renderReviewStarsHeader(parseFloat(displayScore));// [cite: 8]
+        renderFilteredReviewCards(activeModalAllReviews);// [cite: 8]
+      } else {// [cite: 8]
+        listEl.innerHTML = '<div style="padding: 20px; color: #888; text-align: center;">No reviews available.</div>';// [cite: 8]
       }
     })
-    .catch(() => {
-      listEl.innerHTML = '<div style="padding: 20px; color: #888; text-align: center;">Could not load reviews.</div>';
+    .catch(() => {// [cite: 8]
+      listEl.innerHTML = '<div style="padding: 20px; color: #888; text-align: center;">Could not load reviews.</div>';// [cite: 8]
     });
 }
 
-function renderReviewStarsHeader(score) {
-  const container = document.getElementById('modalStarsRow');
-  if (!container) return;
-  container.innerHTML = '';
-  
-  if (score === 0) {
-    for (let i = 1; i <= 5; i++) {
-      container.innerHTML += '<i class="fa-regular fa-star" style="color: #f7a93b;"></i>';
+function renderReviewStarsHeader(score) {// [cite: 8]
+  const container = document.getElementById('modalStarsRow');// [cite: 8]
+  if (!container) return;// [cite: 8]
+  container.innerHTML = '';// [cite: 8]
+
+  if (score === 0) {// [cite: 8]
+    for (let i = 1; i <= 5; i++) {// [cite: 8]
+      container.innerHTML += '<i class="fa-regular fa-star" style="color: #f7a93b;"></i>';// [cite: 8]
     }
-    return;
+    return;// [cite: 8]
   }
 
-  for (let i = 1; i <= 5; i++) {
-    if (score >= i) {
-      container.innerHTML += '<i class="fa-solid fa-star" style="color: #f7a93b;"></i>';
-    } else if (score >= i - 0.5) {
-      container.innerHTML += '<i class="fa-solid fa-star-half-stroke" style="color: #f7a93b;"></i>';
-    } else {
-      container.innerHTML += '<i class="fa-regular fa-star" style="color: #f7a93b;"></i>';
+  for (let i = 1; i <= 5; i++) {// [cite: 8]
+    if (score >= i) {// [cite: 8]
+      container.innerHTML += '<i class="fa-solid fa-star" style="color: #f7a93b;"></i>';// [cite: 8]
+    } else if (score >= i - 0.5) {// [cite: 8]
+      container.innerHTML += '<i class="fa-solid fa-star-half-stroke" style="color: #f7a93b;"></i>';// [cite: 8]
+    } else {// [cite: 8]
+      container.innerHTML += '<i class="fa-regular fa-star" style="color: #f7a93b;"></i>';// [cite: 8]
     }
   }
 }
 
-window.filterModalReviews = function(stars, btnElement) {
-  document.querySelectorAll('.rating-filter-pill').forEach(p => p.classList.remove('active'));
-  btnElement.classList.add('active');
+window.filterModalReviews = function (stars, btnElement) {// [cite: 8]
+  document.querySelectorAll('.rating-filter-pill').forEach(p => p.classList.remove('active'));// [cite: 8]
+  btnElement.classList.add('active');// [cite: 8]
 
-  if (stars === 'all') {
-    renderFilteredReviewCards(activeModalAllReviews);
-  } else {
-    const filtered = activeModalAllReviews.filter(r => parseInt(r.rating_score, 10) === parseInt(stars, 10));
-    renderFilteredReviewCards(filtered);
+  if (stars === 'all') {// [cite: 8]
+    renderFilteredReviewCards(activeModalAllReviews);// [cite: 8]
+  } else {// [cite: 8]
+    const filtered = activeModalAllReviews.filter(r => parseInt(r.rating_score, 10) === parseInt(stars, 10));// [cite: 8]
+    renderFilteredReviewCards(filtered);// [cite: 8]
   }
 };
 
-function renderFilteredReviewCards(reviewsList) {
-  const listEl = document.getElementById('modalReviewsList');
-  if (!listEl) return;
-  listEl.innerHTML = '';
+function renderFilteredReviewCards(reviewsList) {// [cite: 8]
+  const listEl = document.getElementById('modalReviewsList');// [cite: 8]
+  if (!listEl) return;// [cite: 8]
+  listEl.innerHTML = '';// [cite: 8]
 
-  if (!reviewsList || reviewsList.length === 0) {
+  if (!reviewsList || reviewsList.length === 0) {// [cite: 8]
     listEl.innerHTML = `
       <div style="text-align: center; padding: 24px 16px; color: #999;">
         <i class="fa-regular fa-star" style="font-size: 1.8rem; color: #d4c8c1; margin-bottom: 6px;"></i>
         <p style="font-size: 0.95rem; font-weight: 700; color: #664638; margin: 0;">No reviews yet for this filter.</p>
         <p style="font-size: 0.85rem; margin-top: 4px; color: #7C4F38;">Be the first to pop the straw and rate your sip!</p>
       </div>
-    `;
-    return;
+    `;// [cite: 8]
+    return;// [cite: 8]
   }
 
-  reviewsList.forEach(rev => {
-    let starIcons = '';
-    const score = parseInt(rev.rating_score, 10) || 5;
-    for (let s = 1; s <= 5; s++) {
-      starIcons += `<i class="${s <= score ? 'fa-solid' : 'fa-regular'} fa-star" style="color: #f7a93b; font-size: 12px;"></i>`;
+  reviewsList.forEach(rev => {// [cite: 8]
+    let starIcons = '';// [cite: 8]
+    const score = parseInt(rev.rating_score, 10) || 5;// [cite: 8]
+    for (let s = 1; s <= 5; s++) {// [cite: 8]
+      starIcons += `<i class="${s <= score ? 'fa-solid' : 'fa-regular'} fa-star" style="color: #f7a93b; font-size: 12px;"></i>`;// [cite: 8]
     }
 
-    let tagBadges = '';
-    if (rev.experience_tags) {
-      const tagArr = typeof rev.experience_tags === 'string' ? rev.experience_tags.split(',') : rev.experience_tags;
-      tagArr.forEach(tg => {
-        if (String(tg).trim()) {
-          tagBadges += `<span style="display: inline-block; padding: 2px 8px; background: #faf4ef; border: 1px solid #eddcd1; border-radius: 99px; font-size: 11px; font-weight: 700; color: #664638; margin-right: 4px; margin-top: 4px;">${String(tg).trim()}</span>`;
+    let tagBadges = '';// [cite: 8]
+    if (rev.experience_tags) {// [cite: 8]
+      const tagArr = typeof rev.experience_tags === 'string' ? rev.experience_tags.split(',') : rev.experience_tags;// [cite: 8]
+      tagArr.forEach(tg => {// [cite: 8]
+        if (String(tg).trim()) {// [cite: 8]
+          tagBadges += `<span style="display: inline-block; padding: 2px 8px; background: #faf4ef; border: 1px solid #eddcd1; border-radius: 99px; font-size: 11px; font-weight: 700; color: #664638; margin-right: 4px; margin-top: 4px;">${String(tg).trim()}</span>`;// [cite: 8]
         }
       });
     }
 
-    const dateStr = rev.created_at 
-      ? new Date(rev.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) 
-      : '';
+    const dateStr = rev.created_at// [cite: 8]
+      ? new Date(rev.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })// [cite: 8]
+      : '';// [cite: 8]
 
     listEl.innerHTML += `
       <div class="modal-review-card" style="margin-bottom: 12px; padding: 12px 14px; background: #fff; border: 1.5px solid #FCE1DD; border-radius: 18px; display: flex; align-items: flex-start; gap: 12px;">
@@ -524,57 +534,57 @@ function renderFilteredReviewCards(reviewsList) {
           ${dateStr ? `<span style="font-size: 11px; color: #a8948d; margin-top: 4px; display: block; font-weight: 500;">${dateStr}</span>` : ''}
         </div>
       </div>
-    `;
+    `;// [cite: 8]
   });
 }
 
 // ==========================================
-// CUSTOMIZER CORE ENGINE (3-CUP CAROUSEL)
+// CUSTOMIZER CORE ENGINE
 // ==========================================
-function getToppingUnitPrice(toppingName) {
-  if (TOPPING_PRICES && TOPPING_PRICES[toppingName] !== undefined) {
-    return parseFloat(TOPPING_PRICES[toppingName]);
+function getToppingUnitPrice(toppingName) {// [cite: 8]
+  if (TOPPING_PRICES && TOPPING_PRICES[toppingName] !== undefined) {// [cite: 8]
+    return parseFloat(TOPPING_PRICES[toppingName]);// [cite: 8]
   }
-  return (toppingName === 'Choco Chips' || toppingName === 'Condensed Milk') ? 5.00 : 2.00;
+  return (toppingName === 'Choco Chips' || toppingName === 'Condensed Milk') ? 5.00 : 2.00;// [cite: 8]
 }
 
-function getLayer1ImagePath(flavor, jelly, isLarge) {
-  const folder = isLarge ? 'Large Flavors' : 'Small Flavors';
-  const fName = (flavor || 'Pandan').toLowerCase();
-  const jName = (jelly || 'Cube').toLowerCase();
-  return `images/Layer 1/${folder}/${fName} ${jName}.png`;
+function getLayer1ImagePath(flavor, jelly, isLarge) {// [cite: 8]
+  const folder = isLarge ? 'Large Flavors' : 'Small Flavors';// [cite: 8]
+  const fName = (flavor || 'Pandan').toLowerCase();// [cite: 8]
+  const jName = (jelly || 'Cube').toLowerCase();// [cite: 8]
+  return `images/Layer 1/${folder}/${fName} ${jName}.png`;// [cite: 8]
 }
 
-function getLayer2ToppingPath(toppingName, isLarge) {
-  if (!toppingName || toppingName === 'None' || toppingName === 'Condensed Milk') return null;
-  const folder = isLarge ? 'Large Toppings' : 'Small Toppings';
-  let fileName = toppingName === 'Marshmallow' ? 'Mashmallow' : toppingName;
-  return `images/Layer 2/${folder}/${fileName}.png`;
+function getLayer2ToppingPath(toppingName, isLarge) {// [cite: 8]
+  if (!toppingName || toppingName === 'None' || toppingName === 'Condensed Milk') return null;// [cite: 8]
+  const folder = isLarge ? 'Large Toppings' : 'Small Toppings';// [cite: 8]
+  let fileName = toppingName === 'Marshmallow' ? 'Mashmallow' : toppingName;// [cite: 8]
+  return `images/Layer 2/${folder}/${fileName}.png`;// [cite: 8]
 }
 
-function getLayer3CupPath(isLarge) {
-  return isLarge ? 'images/Layer 3/Large Cup.png' : 'images/Layer 3/Small Cup.png';
+function getLayer3CupPath(isLarge) {// [cite: 8]
+  return isLarge ? 'images/Layer 3/Large Cup.png' : 'images/Layer 3/Small Cup.png';// [cite: 8]
 }
 
-function buildLayeredCupHTML(configOverride = {}, stackClass = 'tall-stack') {
-  const cfg = Object.assign({}, customConfig, configOverride);
-  const isLarge = cfg.size === '12oz';
+function buildLayeredCupHTML(configOverride = {}, stackClass = 'tall-stack') {// [cite: 8]
+  const cfg = Object.assign({}, customConfig, configOverride);// [cite: 8]
+  const isLarge = cfg.size === '12oz';// [cite: 8]
 
-  const l1Src = getLayer1ImagePath(cfg.flavor, cfg.jelly, isLarge);
-  const l3Src = getLayer3CupPath(isLarge);
+  const l1Src = getLayer1ImagePath(cfg.flavor, cfg.jelly, isLarge);// [cite: 8]
+  const l3Src = getLayer3CupPath(isLarge);// [cite: 8]
 
-  let activeToppings = [...(cfg.toppings || [])];
-  if (cfg.addonsMap) {
-    Object.keys(cfg.addonsMap).forEach(ad => {
-      if (cfg.addonsMap[ad] > 0 && ad !== 'Condensed Milk') activeToppings.push(ad);
+  let activeToppings = [...(cfg.toppings || [])];// [cite: 8]
+  if (cfg.addonsMap) {// [cite: 8]
+    Object.keys(cfg.addonsMap).forEach(ad => {// [cite: 8]
+      if (cfg.addonsMap[ad] > 0 && ad !== 'Condensed Milk') activeToppings.push(ad);// [cite: 8]
     });
   }
 
-  let l2ImagesHTML = '';
-  activeToppings.forEach(t => {
-    const tSrc = getLayer2ToppingPath(t, isLarge);
-    if (tSrc) {
-      l2ImagesHTML += `<img src="${tSrc}" class="layer-2-toppings" alt="${t}">`;
+  let l2ImagesHTML = '';// [cite: 8]
+  activeToppings.forEach(t => {// [cite: 8]
+    const tSrc = getLayer2ToppingPath(t, isLarge);// [cite: 8]
+    if (tSrc) {// [cite: 8]
+      l2ImagesHTML += `<img src="${tSrc}" class="layer-2-toppings" alt="${t}">`;// [cite: 8]
     }
   });
 
@@ -586,129 +596,129 @@ function buildLayeredCupHTML(configOverride = {}, stackClass = 'tall-stack') {
       </div>
       <img src="${l3Src}" class="layer-3-cup" alt="Cup ${cfg.size}">
     </div>
-  `;
+  `;// [cite: 8]
 }
 
-function calculateCustomTotal() {
-  customConfig.basePrice = customConfig.size === '12oz' ? 19.00 : 15.00;
-  let addOnCost = 0;
-  Object.keys(customConfig.addonsMap).forEach(ad => {
-    const qty = customConfig.addonsMap[ad] || 0;
-    addOnCost += (getToppingUnitPrice(ad) * qty);
+function calculateCustomTotal() {// [cite: 8]
+  customConfig.basePrice = customConfig.size === '12oz' ? 19.00 : 15.00;// [cite: 8]
+  let addOnCost = 0;// [cite: 8]
+  Object.keys(customConfig.addonsMap).forEach(ad => {// [cite: 8]
+    const qty = customConfig.addonsMap[ad] || 0;// [cite: 8]
+    addOnCost += (getToppingUnitPrice(ad) * qty);// [cite: 8]
   });
-  const total = customConfig.basePrice + addOnCost;
-  const totalEl = document.getElementById('customTotalPrice');
-  if (totalEl) totalEl.innerText = '₱ ' + total.toFixed(2);
-  return total;
+  const total = customConfig.basePrice + addOnCost;// [cite: 8]
+  const totalEl = document.getElementById('customTotalPrice');// [cite: 8]
+  if (totalEl) totalEl.innerText = '₱ ' + total.toFixed(2);// [cite: 8]
+  return total;// [cite: 8]
 }
 
-function updateCanvasHeaders() {
-  const title = document.getElementById('canvasTitle');
-  const toppingsSubtitle = document.getElementById('canvasToppingsSubtitle');
-  const addonsSubtitle = document.getElementById('canvasAddonsSubtitle');
+function updateCanvasHeaders() {// [cite: 8]
+  const title = document.getElementById('canvasTitle');// [cite: 8]
+  const toppingsSubtitle = document.getElementById('canvasToppingsSubtitle');// [cite: 8]
+  const addonsSubtitle = document.getElementById('canvasAddonsSubtitle');// [cite: 8]
 
-  if (title) {
-    title.innerText = `${customConfig.size} ${customConfig.flavor} Jelly ${customConfig.jelly === 'Cube' ? 'Cubes' : customConfig.jelly}`;
+  if (title) {// [cite: 8]
+    title.innerText = `${customConfig.size} ${customConfig.flavor} Jelly ${customConfig.jelly === 'Cube' ? 'Cubes' : customConfig.jelly}`;// [cite: 8]
   }
 
-  if (toppingsSubtitle) {
-    if (customConfig.toppings.length > 0) {
-      toppingsSubtitle.style.display = 'block';
-      toppingsSubtitle.innerText = '+ ' + customConfig.toppings.join(' + ');
-    } else {
-      toppingsSubtitle.style.display = 'none';
+  if (toppingsSubtitle) {// [cite: 8]
+    if (customConfig.toppings.length > 0) {// [cite: 8]
+      toppingsSubtitle.style.display = 'block';// [cite: 8]
+      toppingsSubtitle.innerText = '+ ' + customConfig.toppings.join(' + ');// [cite: 8]
+    } else {// [cite: 8]
+      toppingsSubtitle.style.display = 'none';// [cite: 8]
     }
   }
 
-  if (addonsSubtitle) {
-    let addonTextArr = [];
-    Object.keys(customConfig.addonsMap).forEach(ad => {
-      const count = customConfig.addonsMap[ad];
-      if (count > 0) addonTextArr.push(`Extra ${ad} (x${count})`);
+  if (addonsSubtitle) {// [cite: 8]
+    let addonTextArr = [];// [cite: 8]
+    Object.keys(customConfig.addonsMap).forEach(ad => {// [cite: 8]
+      const count = customConfig.addonsMap[ad];// [cite: 8]
+      if (count > 0) addonTextArr.push(`Extra ${ad} (x${count})`);// [cite: 8]
     });
-    if (customConfig.utensils && customConfig.utensils !== 'No Spoon') {
-      addonTextArr.push(customConfig.utensils);
+    if (customConfig.utensils && customConfig.utensils !== 'No Spoon') {// [cite: 8]
+      addonTextArr.push(customConfig.utensils);// [cite: 8]
     }
 
-    if (addonTextArr.length > 0) {
-      addonsSubtitle.style.display = 'block';
-      addonsSubtitle.innerText = '+ ' + addonTextArr.join(' + ');
-    } else {
-      addonsSubtitle.style.display = 'none';
+    if (addonTextArr.length > 0) {// [cite: 8]
+      addonsSubtitle.style.display = 'block';// [cite: 8]
+      addonsSubtitle.innerText = '+ ' + addonTextArr.join(' + ');// [cite: 8]
+    } else {// [cite: 8]
+      addonsSubtitle.style.display = 'none';// [cite: 8]
     }
   }
 }
 
-function rotateActiveTopping(direction) {
-  if (customConfig.toppings.length === 0) {
-    addToppingSlot();
-    return;
+function rotateActiveTopping(direction) {// [cite: 8]
+  if (customConfig.toppings.length === 0) {// [cite: 8]
+    addToppingSlot();// [cite: 8]
+    return;// [cite: 8]
   }
-  const currentSelected = customConfig.toppings[customConfig.activeToppingSlot] || AVAILABLE_TOPPINGS[0];
-  let idx = AVAILABLE_TOPPINGS.indexOf(currentSelected);
-  idx = (idx + direction + AVAILABLE_TOPPINGS.length) % AVAILABLE_TOPPINGS.length;
-  customConfig.toppings[customConfig.activeToppingSlot] = AVAILABLE_TOPPINGS[idx];
+  const currentSelected = customConfig.toppings[customConfig.activeToppingSlot] || AVAILABLE_TOPPINGS[0];// [cite: 8]
+  let idx = AVAILABLE_TOPPINGS.indexOf(currentSelected);// [cite: 8]
+  idx = (idx + direction + AVAILABLE_TOPPINGS.length) % AVAILABLE_TOPPINGS.length;// [cite: 8]
+  customConfig.toppings[customConfig.activeToppingSlot] = AVAILABLE_TOPPINGS[idx];// [cite: 8]
 }
 
-window.nextCustomizerChoice = function() {
-  const stage = STAGES[currentStageIndex];
-  if (stage === 'cup') {
-    customConfig.size = '8oz';
-  } else if (stage === 'flavor') {
-    const choices = STAGE_CHOICES.flavor;
-    let idx = choices.findIndex(c => c.id === customConfig.flavor);
-    customConfig.flavor = choices[(idx + 1) % choices.length].id;
-  } else if (stage === 'jelly') {
-    const choices = STAGE_CHOICES.jelly;
-    let idx = choices.findIndex(c => c.id === customConfig.jelly);
-    customConfig.jelly = choices[(idx + 1) % choices.length].id;
-  } else if (stage === 'toppings') {
-    rotateActiveTopping(1);
+window.nextCustomizerChoice = function () {// [cite: 8]
+  const stage = STAGES[currentStageIndex];// [cite: 8]
+  if (stage === 'cup') {// [cite: 8]
+    customConfig.size = '8oz';// [cite: 8]
+  } else if (stage === 'flavor') {// [cite: 8]
+    const choices = STAGE_CHOICES.flavor;// [cite: 8]
+    let idx = choices.findIndex(c => c.id === customConfig.flavor);// [cite: 8]
+    customConfig.flavor = choices[(idx + 1) % choices.length].id;// [cite: 8]
+  } else if (stage === 'jelly') {// [cite: 8]
+    const choices = STAGE_CHOICES.jelly;// [cite: 8]
+    let idx = choices.findIndex(c => c.id === customConfig.jelly);// [cite: 8]
+    customConfig.jelly = choices[(idx + 1) % choices.length].id;// [cite: 8]
+  } else if (stage === 'toppings') {// [cite: 8]
+    rotateActiveTopping(1);// [cite: 8]
   }
-  renderCustomizerUI();
+  renderCustomizerUI();// [cite: 8]
 };
 
-window.prevCustomizerChoice = function() {
-  const stage = STAGES[currentStageIndex];
-  if (stage === 'cup') {
-    customConfig.size = '12oz';
-  } else if (stage === 'flavor') {
-    const choices = STAGE_CHOICES.flavor;
-    let idx = choices.findIndex(c => c.id === customConfig.flavor);
-    customConfig.flavor = choices[(idx - 1 + choices.length) % choices.length].id;
-  } else if (stage === 'jelly') {
-    const choices = STAGE_CHOICES.jelly;
-    let idx = choices.findIndex(c => c.id === customConfig.jelly);
-    customConfig.jelly = choices[(idx - 1 + choices.length) % choices.length].id;
-  } else if (stage === 'toppings') {
-    rotateActiveTopping(-1);
+window.prevCustomizerChoice = function () {// [cite: 8]
+  const stage = STAGES[currentStageIndex];// [cite: 8]
+  if (stage === 'cup') {// [cite: 8]
+    customConfig.size = '12oz';// [cite: 8]
+  } else if (stage === 'flavor') {// [cite: 8]
+    const choices = STAGE_CHOICES.flavor;// [cite: 8]
+    let idx = choices.findIndex(c => c.id === customConfig.flavor);// [cite: 8]
+    customConfig.flavor = choices[(idx - 1 + choices.length) % choices.length].id;// [cite: 8]
+  } else if (stage === 'jelly') {// [cite: 8]
+    const choices = STAGE_CHOICES.jelly;// [cite: 8]
+    let idx = choices.findIndex(c => c.id === customConfig.jelly);// [cite: 8]
+    customConfig.jelly = choices[(idx - 1 + choices.length) % choices.length].id;// [cite: 8]
+  } else if (stage === 'toppings') {// [cite: 8]
+    rotateActiveTopping(-1);// [cite: 8]
   }
-  renderCustomizerUI();
+  renderCustomizerUI();// [cite: 8]
 };
 
-window.switchCustomStage = function(stageName) {
-  currentStageIndex = STAGES.indexOf(stageName);
-  if (currentStageIndex === -1) currentStageIndex = 0;
-  renderCustomizerUI();
+window.switchCustomStage = function (stageName) {// [cite: 8]
+  currentStageIndex = STAGES.indexOf(stageName);// [cite: 8]
+  if (currentStageIndex === -1) currentStageIndex = 0;// [cite: 8]
+  renderCustomizerUI();// [cite: 8]
 };
 
-function renderCustomizerUI() {
-  const currentStage = STAGES[currentStageIndex];
-  const sidebar = document.getElementById('customizerSidebarContent');
-  const stageContainer = document.getElementById('stageItemsContainer');
+function renderCustomizerUI() {// [cite: 8]
+  const currentStage = STAGES[currentStageIndex];// [cite: 8]
+  const sidebar = document.getElementById('customizerSidebarContent');// [cite: 8]
+  const stageContainer = document.getElementById('stageItemsContainer');// [cite: 8]
 
-  document.querySelectorAll('.stage-pill').forEach((pill, idx) => {
-    pill.classList.toggle('active', idx === currentStageIndex);
+  document.querySelectorAll('.stage-pill').forEach((pill, idx) => {// [cite: 8]
+    pill.classList.toggle('active', idx === currentStageIndex);// [cite: 8]
   });
 
-  calculateCustomTotal();
-  updateCanvasHeaders();
+  calculateCustomTotal();// [cite: 8]
+  updateCanvasHeaders();// [cite: 8]
 
-  const isLarge = customConfig.size === '12oz';
-  const stackClass = isLarge ? 'tall-stack' : 'short-stack';
+  const isLarge = customConfig.size === '12oz';// [cite: 8]
+  const stackClass = isLarge ? 'tall-stack' : 'short-stack';// [cite: 8]
 
-  if (sidebar) {
-    if (currentStage === 'cup') {
+  if (sidebar) {// [cite: 8]
+    if (currentStage === 'cup') {// [cite: 8]
       sidebar.innerHTML = `
         <h3 class="sidebar-title">Sizes</h3>
         <div class="size-options-list">
@@ -723,8 +733,8 @@ function renderCustomizerUI() {
             <span class="radio-text">8oz</span>
           </label>
         </div>
-      `;
-    } else if (currentStage === 'flavor') {
+      `;// [cite: 8]
+    } else if (currentStage === 'flavor') {// [cite: 8]
       sidebar.innerHTML = `
         <h3 class="sidebar-title">Flavor</h3>
         <div class="size-options-list">
@@ -736,8 +746,8 @@ function renderCustomizerUI() {
             </label>
           `).join('')}
         </div>
-      `;
-    } else if (currentStage === 'jelly') {
+      `;// [cite: 8]
+    } else if (currentStage === 'jelly') {// [cite: 8]
       sidebar.innerHTML = `
         <h3 class="sidebar-title">Jelly</h3>
         <div class="size-options-list">
@@ -749,11 +759,11 @@ function renderCustomizerUI() {
             </label>
           `).join('')}
         </div>
-      `;
-    } else if (currentStage === 'toppings') {
-      let toppingSlotsHTML = '';
-      customConfig.toppings.forEach((top, idx) => {
-        const price = getToppingUnitPrice(top);
+      `;// [cite: 8]
+    } else if (currentStage === 'toppings') {// [cite: 8]
+      let toppingSlotsHTML = '';// [cite: 8]
+      customConfig.toppings.forEach((top, idx) => {// [cite: 8]
+        const price = getToppingUnitPrice(top);// [cite: 8]
         toppingSlotsHTML += `
           <div class="topping-slot-card ${customConfig.activeToppingSlot === idx ? 'active-slot' : ''}" onclick="selectToppingSlot(${idx})">
             <div class="slot-info">
@@ -764,36 +774,36 @@ function renderCustomizerUI() {
               <i class="fa-solid fa-xmark"></i>
             </button>
           </div>
-        `;
+        `;// [cite: 8]
       });
 
-      let addSlotButtonHTML = '';
-      if (customConfig.toppings.length < 2) {
+      let addSlotButtonHTML = '';// [cite: 8]
+      if (customConfig.toppings.length < 2) {// [cite: 8]
         addSlotButtonHTML = `
           <button type="button" class="btn-add-topping-slot" onclick="addToppingSlot()">
             <i class="fa-solid fa-plus"></i> Add Topping (${customConfig.toppings.length}/2)
           </button>
-        `;
+        `;// [cite: 8]
       }
 
-      let toppingPickerHTML = '';
-      if (customConfig.toppings.length > 0) {
-        const currentActiveVal = customConfig.toppings[customConfig.activeToppingSlot];
+      let toppingPickerHTML = '';// [cite: 8]
+      if (customConfig.toppings.length > 0) {// [cite: 8]
+        const currentActiveVal = customConfig.toppings[customConfig.activeToppingSlot];// [cite: 8]
         toppingPickerHTML = `
           <div class="toppings-selection-list">
             <span class="sidebar-instruction">Choose for Slot #${customConfig.activeToppingSlot + 1}:</span>
-            ${AVAILABLE_TOPPINGS.map(t => {
-              const price = getToppingUnitPrice(t);
-              return `
+            ${AVAILABLE_TOPPINGS.map(t => {// [cite: 8]
+          const price = getToppingUnitPrice(t);// [cite: 8]
+          return `
                 <label class="custom-radio-label">
                   <input type="radio" name="slot_topping" value="${t}" ${currentActiveVal === t ? 'checked' : ''} onchange="setToppingForActiveSlot('${t}')">
                   <span class="radio-mark"></span>
                   <span class="radio-text">${t} (+₱${price.toFixed(2)})</span>
                 </label>
-              `;
-            }).join('')}
+              `;// [cite: 8]
+        }).join('')}
           </div>
-        `;
+        `;// [cite: 8]
       }
 
       sidebar.innerHTML = `
@@ -803,16 +813,16 @@ function renderCustomizerUI() {
           ${addSlotButtonHTML}
         </div>
         ${toppingPickerHTML}
-      `;
-    } else if (currentStage === 'addons') {
-      const regularAddons = AVAILABLE_TOPPINGS.filter(a => a !== 'Choco Chips');
+      `;// [cite: 8]
+    } else if (currentStage === 'addons') {// [cite: 8]
+      const regularAddons = AVAILABLE_TOPPINGS.filter(a => a !== 'Choco Chips');// [cite: 8]
       sidebar.innerHTML = `
         <h3 class="sidebar-title">Add ons</h3>
         <span class="sidebar-price-tag">Extra Toppings</span>
         <div class="addons-qty-list">
-          ${regularAddons.map(ad => {
-            const count = customConfig.addonsMap[ad] || 0;
-            return `
+          ${regularAddons.map(ad => {// [cite: 8]
+        const count = customConfig.addonsMap[ad] || 0;// [cite: 8]
+        return `
               <div class="addon-qty-row">
                 <span class="addon-name">${ad} (+₱${getToppingUnitPrice(ad).toFixed(2)})</span>
                 <div class="addon-qty-control">
@@ -821,8 +831,8 @@ function renderCustomizerUI() {
                   <button type="button" class="btn-addon-qty" onclick="changeAddonQty('${ad}', 1)">+</button>
                 </div>
               </div>
-            `;
-          }).join('')}
+            `;// [cite: 8]
+      }).join('')}
         </div>
         
         <span class="sidebar-price-tag" style="margin-top: 8px;">Premium Add-ons</span>
@@ -858,13 +868,13 @@ function renderCustomizerUI() {
             <span class="radio-text">Spoon</span>
           </label>
         </div>
-      `;
+      `;// [cite: 8]
     }
   }
 
-  if (stageContainer) {
-    if (currentStage === 'cup') {
-      if (customConfig.size === '12oz') {
+  if (stageContainer) {// [cite: 8]
+    if (currentStage === 'cup') {// [cite: 8]
+      if (customConfig.size === '12oz') {// [cite: 8]
         stageContainer.innerHTML = `
           <div class="layered-cup-display-item empty-slot"></div>
           <div class="layered-cup-display-item active-cup-choice">
@@ -875,8 +885,8 @@ function renderCustomizerUI() {
             <span class="cup-label-top">8oz</span>
             ${buildLayeredCupHTML({ size: '8oz' }, 'short-stack')}
           </div>
-        `;
-      } else {
+        `;// [cite: 8]
+      } else {// [cite: 8]
         stageContainer.innerHTML = `
           <div class="layered-cup-display-item" onclick="selectCustomSize('12oz')">
             <span class="cup-label-top">12oz</span>
@@ -887,13 +897,13 @@ function renderCustomizerUI() {
             ${buildLayeredCupHTML({ size: '8oz' }, 'short-stack')}
           </div>
           <div class="layered-cup-display-item empty-slot"></div>
-        `;
+        `;// [cite: 8]
       }
-    } else if (currentStage === 'flavor') {
-      const choices = STAGE_CHOICES.flavor;
-      const idx = choices.findIndex(c => c.id === customConfig.flavor);
-      const prev = choices[(idx - 1 + choices.length) % choices.length];
-      const next = choices[(idx + 1) % choices.length];
+    } else if (currentStage === 'flavor') {// [cite: 8]
+      const choices = STAGE_CHOICES.flavor;// [cite: 8]
+      const idx = choices.findIndex(c => c.id === customConfig.flavor);// [cite: 8]
+      const prev = choices[(idx - 1 + choices.length) % choices.length];// [cite: 8]
+      const next = choices[(idx + 1) % choices.length];// [cite: 8]
 
       stageContainer.innerHTML = `
         <div class="layered-cup-display-item" onclick="selectCustomFlavor('${prev.id}')">
@@ -908,12 +918,12 @@ function renderCustomizerUI() {
           <span class="cup-label-top">${next.label}</span>
           ${buildLayeredCupHTML({ flavor: next.id }, stackClass)}
         </div>
-      `;
-    } else if (currentStage === 'jelly') {
-      const choices = STAGE_CHOICES.jelly;
-      const idx = choices.findIndex(c => c.id === customConfig.jelly);
-      const prev = choices[(idx - 1 + choices.length) % choices.length];
-      const next = choices[(idx + 1) % choices.length];
+      `;// [cite: 8]
+    } else if (currentStage === 'jelly') {// [cite: 8]
+      const choices = STAGE_CHOICES.jelly;// [cite: 8]
+      const idx = choices.findIndex(c => c.id === customConfig.jelly);// [cite: 8]
+      const prev = choices[(idx - 1 + choices.length) % choices.length];// [cite: 8]
+      const next = choices[(idx + 1) % choices.length];// [cite: 8]
 
       stageContainer.innerHTML = `
         <div class="layered-cup-display-item" onclick="selectCustomJelly('${prev.id}')">
@@ -928,15 +938,15 @@ function renderCustomizerUI() {
           <span class="cup-label-top">${next.label}</span>
           ${buildLayeredCupHTML({ jelly: next.id }, stackClass)}
         </div>
-      `;
-    } else if (currentStage === 'toppings') {
-      const currentTop = customConfig.toppings[customConfig.activeToppingSlot] || AVAILABLE_TOPPINGS[0];
-      const tIdx = AVAILABLE_TOPPINGS.indexOf(currentTop);
-      const prevTop = AVAILABLE_TOPPINGS[(tIdx - 1 + AVAILABLE_TOPPINGS.length) % AVAILABLE_TOPPINGS.length];
-      const nextTop = AVAILABLE_TOPPINGS[(tIdx + 1) % AVAILABLE_TOPPINGS.length];
+      `;// [cite: 8]
+    } else if (currentStage === 'toppings') {// [cite: 8]
+      const currentTop = customConfig.toppings[customConfig.activeToppingSlot] || AVAILABLE_TOPPINGS[0];// [cite: 8]
+      const tIdx = AVAILABLE_TOPPINGS.indexOf(currentTop);// [cite: 8]
+      const prevTop = AVAILABLE_TOPPINGS[(tIdx - 1 + AVAILABLE_TOPPINGS.length) % AVAILABLE_TOPPINGS.length];// [cite: 8]
+      const nextTop = AVAILABLE_TOPPINGS[(tIdx + 1) % AVAILABLE_TOPPINGS.length];// [cite: 8]
 
-      const prevScatter = getLayer2ToppingPath(prevTop, isLarge);
-      const nextScatter = getLayer2ToppingPath(nextTop, isLarge);
+      const prevScatter = getLayer2ToppingPath(prevTop, isLarge);// [cite: 8]
+      const nextScatter = getLayer2ToppingPath(nextTop, isLarge);// [cite: 8]
 
       stageContainer.innerHTML = `
         <div class="layered-cup-display-item" onclick="setToppingForActiveSlot('${prevTop}')">
@@ -955,15 +965,15 @@ function renderCustomizerUI() {
             ${nextScatter ? `<img src="${nextScatter}" class="scatter-img" alt="${nextTop}">` : ''}
           </div>
         </div>
-      `;
-    } else if (currentStage === 'addons') {
-      const regularAddons = AVAILABLE_TOPPINGS.filter(a => a !== 'Choco Chips');
-      const activeAddonKeys = Object.keys(customConfig.addonsMap).filter(k => customConfig.addonsMap[k] > 0);
+      `;// [cite: 8]
+    } else if (currentStage === 'addons') {// [cite: 8]
+      const regularAddons = AVAILABLE_TOPPINGS.filter(a => a !== 'Choco Chips');// [cite: 8]
+      const activeAddonKeys = Object.keys(customConfig.addonsMap).filter(k => customConfig.addonsMap[k] > 0);// [cite: 8]
 
-      const prevAddon = regularAddons[0] || 'Cheese';
-      const nextAddon = regularAddons[1] || 'Tapioca';
-      const prevScatter = getLayer2ToppingPath(prevAddon, isLarge);
-      const nextScatter = getLayer2ToppingPath(nextAddon, isLarge);
+      const prevAddon = regularAddons[0] || 'Cheese';// [cite: 8]
+      const nextAddon = regularAddons[1] || 'Tapioca';// [cite: 8]
+      const prevScatter = getLayer2ToppingPath(prevAddon, isLarge);// [cite: 8]
+      const nextScatter = getLayer2ToppingPath(nextAddon, isLarge);// [cite: 8]
 
       stageContainer.innerHTML = `
         <div class="layered-cup-display-item" onclick="changeAddonQty('${prevAddon}', 1)">
@@ -982,97 +992,97 @@ function renderCustomizerUI() {
             ${nextScatter ? `<img src="${nextScatter}" class="scatter-img" alt="${nextAddon}">` : ''}
           </div>
         </div>
-      `;
+      `;// [cite: 8]
     }
   }
 }
 
-window.selectCustomSize = function(size) {
-  customConfig.size = size;
-  renderCustomizerUI();
+window.selectCustomSize = function (size) {// [cite: 8]
+  customConfig.size = size;// [cite: 8]
+  renderCustomizerUI();// [cite: 8]
 };
 
-window.selectCustomFlavor = function(flavor) {
-  customConfig.flavor = flavor;
-  renderCustomizerUI();
+window.selectCustomFlavor = function (flavor) {// [cite: 8]
+  customConfig.flavor = flavor;// [cite: 8]
+  renderCustomizerUI();// [cite: 8]
 };
 
-window.selectCustomJelly = function(jelly) {
-  customConfig.jelly = jelly;
-  renderCustomizerUI();
+window.selectCustomJelly = function (jelly) {// [cite: 8]
+  customConfig.jelly = jelly;// [cite: 8]
+  renderCustomizerUI();// [cite: 8]
 };
 
-window.addToppingSlot = function() {
-  if (customConfig.toppings.length < 2) {
-    const nextDefault = AVAILABLE_TOPPINGS.find(t => !customConfig.toppings.includes(t)) || AVAILABLE_TOPPINGS[0];
-    customConfig.toppings.push(nextDefault);
-    customConfig.activeToppingSlot = customConfig.toppings.length - 1;
-    renderCustomizerUI();
+window.addToppingSlot = function () {// [cite: 8]
+  if (customConfig.toppings.length < 2) {// [cite: 8]
+    const nextDefault = AVAILABLE_TOPPINGS.find(t => !customConfig.toppings.includes(t)) || AVAILABLE_TOPPINGS[0];// [cite: 8]
+    customConfig.toppings.push(nextDefault);// [cite: 8]
+    customConfig.activeToppingSlot = customConfig.toppings.length - 1;// [cite: 8]
+    renderCustomizerUI();// [cite: 8]
   }
 };
 
-window.removeToppingSlot = function(slotIndex, event) {
-  if (event) event.stopPropagation();
-  customConfig.toppings.splice(slotIndex, 1);
-  customConfig.activeToppingSlot = Math.max(0, customConfig.toppings.length - 1);
-  renderCustomizerUI();
+window.removeToppingSlot = function (slotIndex, event) {// [cite: 8]
+  if (event) event.stopPropagation();// [cite: 8]
+  customConfig.toppings.splice(slotIndex, 1);// [cite: 8]
+  customConfig.activeToppingSlot = Math.max(0, customConfig.toppings.length - 1);// [cite: 8]
+  renderCustomizerUI();// [cite: 8]
 };
 
-window.selectToppingSlot = function(slotIndex) {
-  customConfig.activeToppingSlot = slotIndex;
-  renderCustomizerUI();
+window.selectToppingSlot = function (slotIndex) {// [cite: 8]
+  customConfig.activeToppingSlot = slotIndex;// [cite: 8]
+  renderCustomizerUI();// [cite: 8]
 };
 
-window.setToppingForActiveSlot = function(toppingName) {
-  if (customConfig.toppings.length === 0) {
-    customConfig.toppings.push(toppingName);
-    customConfig.activeToppingSlot = 0;
-  } else {
-    customConfig.toppings[customConfig.activeToppingSlot] = toppingName;
+window.setToppingForActiveSlot = function (toppingName) {// [cite: 8]
+  if (customConfig.toppings.length === 0) {// [cite: 8]
+    customConfig.toppings.push(toppingName);// [cite: 8]
+    customConfig.activeToppingSlot = 0;// [cite: 8]
+  } else {// [cite: 8]
+    customConfig.toppings[customConfig.activeToppingSlot] = toppingName;// [cite: 8]
   }
-  renderCustomizerUI();
+  renderCustomizerUI();// [cite: 8]
 };
 
-window.changeAddonQty = function(addonName, delta) {
-  const current = customConfig.addonsMap[addonName] || 0;
-  const updated = Math.max(0, current + delta);
-  if (updated === 0) {
-    delete customConfig.addonsMap[addonName];
-  } else {
-    customConfig.addonsMap[addonName] = updated;
+window.changeAddonQty = function (addonName, delta) {// [cite: 8]
+  const current = customConfig.addonsMap[addonName] || 0;// [cite: 8]
+  const updated = Math.max(0, current + delta);// [cite: 8]
+  if (updated === 0) {// [cite: 8]
+    delete customConfig.addonsMap[addonName];// [cite: 8]
+  } else {// [cite: 8]
+    customConfig.addonsMap[addonName] = updated;// [cite: 8]
   }
-  renderCustomizerUI();
+  renderCustomizerUI();// [cite: 8]
 };
 
-window.selectUtensil = function(utensil) {
-  customConfig.utensils = utensil;
-  renderCustomizerUI();
+window.selectUtensil = function (utensil) {// [cite: 8]
+  customConfig.utensils = utensil;// [cite: 8]
+  renderCustomizerUI();// [cite: 8]
 };
 
 // ==========================================
 // CHECKOUT & CART FOR CUSTOM CUPS
 // ==========================================
-window.addCustomCupToCart = async function() {
-  const isLarge = customConfig.size === '12oz';
-  let accentColor = '#664638';
-  if (customConfig.flavor === 'Strawberry') accentColor = '#f48a8e';
-  if (customConfig.flavor === 'Pandan') accentColor = '#8bb35c';
+window.addCustomCupToCart = async function () {// [cite: 8]
+  const isLarge = customConfig.size === '12oz';// [cite: 8]
+  let accentColor = '#664638';// [cite: 8]
+  if (customConfig.flavor === 'Strawberry') accentColor = '#f48a8e';// [cite: 8]
+  if (customConfig.flavor === 'Pandan') accentColor = '#8bb35c';// [cite: 8]
 
-  let addonStr = [];
-  Object.keys(customConfig.addonsMap).forEach(a => {
-    if (customConfig.addonsMap[a] > 0) addonStr.push(`Extra ${a} (x${customConfig.addonsMap[a]})`);
+  let addonStr = [];// [cite: 8]
+  Object.keys(customConfig.addonsMap).forEach(a => {// [cite: 8]
+    if (customConfig.addonsMap[a] > 0) addonStr.push(`Extra ${a} (x${customConfig.addonsMap[a]})`);// [cite: 8]
   });
-  if (customConfig.utensils && customConfig.utensils !== 'No Spoon') {
-    addonStr.push(customConfig.utensils);
+  if (customConfig.utensils && customConfig.utensils !== 'No Spoon') {// [cite: 8]
+    addonStr.push(customConfig.utensils);// [cite: 8]
   }
 
-  const itemTitle = `${customConfig.flavor} Jelly ${customConfig.jelly === 'Cube' ? 'Cubes' : customConfig.jelly}`;
-  const l1Src = getLayer1ImagePath(customConfig.flavor, customConfig.jelly, isLarge);
-  const l3Src = getLayer3CupPath(isLarge);
-  const firstTop = customConfig.toppings[0] || null;
-  const l2Src = firstTop ? getLayer2ToppingPath(firstTop, isLarge) : '';
+  const itemTitle = `${customConfig.flavor} Jelly ${customConfig.jelly === 'Cube' ? 'Cubes' : customConfig.jelly}`;// [cite: 8]
+  const l1Src = getLayer1ImagePath(customConfig.flavor, customConfig.jelly, isLarge);// [cite: 8]
+  const l3Src = getLayer3CupPath(isLarge);// [cite: 8]
+  const firstTop = customConfig.toppings[0] || null;// [cite: 8]
+  const l2Src = firstTop ? getLayer2ToppingPath(firstTop, isLarge) : '';// [cite: 8]
 
-  const payload = {
+  const payload = {// [cite: 8]
     title: itemTitle,
     size: customConfig.size,
     flavor: customConfig.flavor,
@@ -1086,26 +1096,27 @@ window.addCustomCupToCart = async function() {
     flavor_img: l1Src,
     toppings_img: l2Src,
     cup_img: l3Src
-  };
+  };// [cite: 8]
 
-  const user = JSON.parse(localStorage.getItem('mm_user') || '{}');
+  const user = JSON.parse(localStorage.getItem('mm_user') || '{}');// [cite: 8]
 
-  try {
-    const res = await fetch('/api/cart', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        action: 'add', 
+  try {// [cite: 8]
+    const res = await fetch('/api/cart', {// [cite: 8]
+      method: 'POST',// [cite: 8]
+      headers: { 'Content-Type': 'application/json' },// [cite: 8]
+      body: JSON.stringify({// [cite: 8]
+        action: 'add',
         item: payload,
-        customer_id: user.customer_id || 11 
-      })
-    });
-    if (!res.ok) throw new Error('Network error');
-  } catch (err) {
-    console.error('Custom cup cart add error:', err);
+        customer_id: user.customer_id || null,
+        session_id: !user.customer_id ? getGuestSessionId() : null
+      })// [cite: 8]
+    });// [cite: 8]
+    if (!res.ok) throw new Error('Network error');// [cite: 8]
+  } catch (err) {// [cite: 8]
+    console.error('Custom cup cart add error:', err);// [cite: 8]
   }
 
-  CartAlert.showModal({
+  CartAlert.showModal({// [cite: 8]
     title: itemTitle,
     size: customConfig.size,
     flavor_img: l1Src,
@@ -1113,30 +1124,30 @@ window.addCustomCupToCart = async function() {
     cup_img: l3Src,
     accent_color: accentColor,
     onCheckout: () => { window.location.href = 'cart.html'; }
-  });
-  updateCartCount();
+  });// [cite: 8]
+  updateCartCount();// [cite: 8]
 };
 
-window.proceedCustomOrderSummary = function() {
-  const isLarge = customConfig.size === '12oz';
-  let addonStr = [];
-  Object.keys(customConfig.addonsMap).forEach(a => {
-    if (customConfig.addonsMap[a] > 0) addonStr.push(`Extra ${a} (x${customConfig.addonsMap[a]})`);
+window.proceedCustomOrderSummary = function () {// [cite: 8]
+  const isLarge = customConfig.size === '12oz';// [cite: 8]
+  let addonStr = [];// [cite: 8]
+  Object.keys(customConfig.addonsMap).forEach(a => {// [cite: 8]
+    if (customConfig.addonsMap[a] > 0) addonStr.push(`Extra ${a} (x${customConfig.addonsMap[a]})`);// [cite: 8]
   });
-  if (customConfig.utensils && customConfig.utensils !== 'No Spoon') {
-    addonStr.push(customConfig.utensils);
+  if (customConfig.utensils && customConfig.utensils !== 'No Spoon') {// [cite: 8]
+    addonStr.push(customConfig.utensils);// [cite: 8]
   }
 
-  const l1Src = getLayer1ImagePath(customConfig.flavor, customConfig.jelly, isLarge);
-  const l3Src = getLayer3CupPath(isLarge);
-  const firstTop = customConfig.toppings[0] || null;
-  const l2Src = firstTop ? getLayer2ToppingPath(firstTop, isLarge) : '';
+  const l1Src = getLayer1ImagePath(customConfig.flavor, customConfig.jelly, isLarge);// [cite: 8]
+  const l3Src = getLayer3CupPath(isLarge);// [cite: 8]
+  const firstTop = customConfig.toppings[0] || null;// [cite: 8]
+  const l2Src = firstTop ? getLayer2ToppingPath(firstTop, isLarge) : '';// [cite: 8]
 
-  let accentColor = '#664638';
-  if (customConfig.flavor === 'Strawberry') accentColor = '#f48a8e';
-  if (customConfig.flavor === 'Pandan') accentColor = '#8bb35c';
+  let accentColor = '#664638';// [cite: 8]
+  if (customConfig.flavor === 'Strawberry') accentColor = '#f48a8e';// [cite: 8]
+  if (customConfig.flavor === 'Pandan') accentColor = '#8bb35c';// [cite: 8]
 
-  const items = [{
+  const items = [{// [cite: 8]
     title: `${customConfig.flavor} Jelly ${customConfig.jelly === 'Cube' ? 'Cubes' : customConfig.jelly}`,
     size: customConfig.size,
     is_custom: true,
@@ -1149,25 +1160,25 @@ window.proceedCustomOrderSummary = function() {
     addons: addonStr.length > 0 ? '+ ' + addonStr.join(' + ') : '',
     unit_price: calculateCustomTotal(),
     quantity: 1
-  }];
+  }];// [cite: 8]
 
-  if (typeof renderOrderSummaryModal === 'function') {
-    renderOrderSummaryModal(items);
+  if (typeof renderOrderSummaryModal === 'function') {// [cite: 8]
+    renderOrderSummaryModal(items);// [cite: 8]
   }
 };
 
 // ==========================================
 // ORDER RECENT & CARD HELPERS
 // ==========================================
-function getOrderDrinkMetadata(itemTitle) {
-  const titleClean = (itemTitle || '').toLowerCase();
+function getOrderDrinkMetadata(itemTitle) {// [cite: 8]
+  const titleClean = (itemTitle || '').toLowerCase();// [cite: 8]
 
-  const found = PRESET_SIGNATURES.find(p => {
-    const pTitle = p.title.replace(/\r?\n|\r/g, ' ').toLowerCase();
-    return titleClean.includes(pTitle) || pTitle.includes(cleanKey => titleClean.includes(cleanKey));
+  const found = PRESET_SIGNATURES.find(p => {// [cite: 8]
+    const pTitle = p.title.replace(/\r?\n|\r/g, ' ').toLowerCase();// [cite: 8]
+    return titleClean.includes(pTitle) || pTitle.includes(cleanKey => titleClean.includes(cleanKey));// [cite: 8]
   });
 
-  if (found) {
+  if (found) {// [cite: 8]
     return {
       image: found.image,
       accent: found.accent_color || '#F48A8E',
@@ -1175,90 +1186,116 @@ function getOrderDrinkMetadata(itemTitle) {
     };
   }
 
-  if (titleClean.includes('pandan')) {
-    return { image: 'images/Cheesy Pandan Cubes.png', accent: '#8bb35c', title: itemTitle };
-  } else if (titleClean.includes('coffee') || titleClean.includes('chocolatey')) {
-    return { image: 'images/Chocolatey Coffee Noodly Jelly.png', accent: '#664638', title: itemTitle };
-  } else if (titleClean.includes('strawberry')) {
-    return { image: 'images/Strawberry String Party.png', accent: '#f48a8e', title: itemTitle };
+  if (titleClean.includes('pandan')) {// [cite: 8]
+    return { image: 'images/Cheesy Pandan Cubes.png', accent: '#8bb35c', title: itemTitle };// [cite: 8]
+  } else if (titleClean.includes('coffee') || titleClean.includes('chocolatey')) {// [cite: 8]
+    return { image: 'images/Chocolatey Coffee Noodly Jelly.png', accent: '#664638', title: itemTitle };// [cite: 8]
+  } else if (titleClean.includes('strawberry')) {// [cite: 8]
+    return { image: 'images/Strawberry String Party.png', accent: '#f48a8e', title: itemTitle };// [cite: 8]
   }
 
-  return { image: 'images/Cheesy Pandan Cubes.png', accent: '#8bb35c', title: itemTitle || 'Special Blend Cup' };
+  return { image: 'images/Cheesy Pandan Cubes.png', accent: '#8bb35c', title: itemTitle || 'Special Blend Cup' };// [cite: 8]
 }
 
-function formatOrderStatus(status) {
-  if (!status) return 'Pending';
-  const s = status.toUpperCase().trim();
-  if (s === 'PAID_VERIFIED' || s === 'PREPARING') return 'Preparing';
-  if (s === 'PENDING_PAYMENT' || s === 'PENDING') return 'Pending';
-  if (s === 'READY_FOR_PICKUP') return 'Ready for Pick-Up';
-  if (s === 'COMPLETED') return 'Completed';
-  if (s === 'CONFIRMED') return 'Confirmed';
-  if (s === 'CANCELLED') return 'Cancelled';
-  return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+function formatOrderStatus(status) {// [cite: 8]
+  if (!status) return 'Pending';// [cite: 8]
+  const s = status.toUpperCase().trim();// [cite: 8]
+  if (s === 'PAID_VERIFIED' || s === 'PREPARING') return 'Preparing';// [cite: 8]
+  if (s === 'PENDING_PAYMENT' || s === 'PENDING') return 'Pending';// [cite: 8]
+  if (s === 'READY_FOR_PICKUP') return 'Ready for Pick-Up';// [cite: 8]
+  if (s === 'COMPLETED') return 'Completed';// [cite: 8]
+  if (s === 'CONFIRMED') return 'Confirmed';// [cite: 8]
+  if (s === 'CANCELLED') return 'Cancelled';// [cite: 8]
+  return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();// [cite: 8]
 }
 
-function getOrderStatusClass(status) {
-  if (!status) return 'pending';
-  const s = status.toUpperCase().trim();
-  if (s === 'PAID_VERIFIED' || s === 'PREPARING') return 'preparing';
-  if (s === 'PENDING_PAYMENT' || s === 'PENDING') return 'pending';
-  if (s === 'READY_FOR_PICKUP') return 'ready-for-pickup';
-  if (s === 'COMPLETED') return 'completed';
-  if (s === 'CONFIRMED') return 'confirmed';
-  if (s === 'CANCELLED') return 'cancelled';
-  return s.toLowerCase().replace(/_/g, '-');
+function getOrderStatusClass(status) {// [cite: 8]
+  if (!status) return 'pending';// [cite: 8]
+  const s = status.toUpperCase().trim();// [cite: 8]
+  if (s === 'PAID_VERIFIED' || s === 'PREPARING') return 'preparing';// [cite: 8]
+  if (s === 'PENDING_PAYMENT' || s === 'PENDING') return 'pending';// [cite: 8]
+  if (s === 'READY_FOR_PICKUP') return 'ready-for-pickup';// [cite: 8]
+  if (s === 'COMPLETED') return 'completed';// [cite: 8]
+  if (s === 'CONFIRMED') return 'confirmed';// [cite: 8]
+  if (s === 'CANCELLED') return 'cancelled';// [cite: 8]
+  return s.toLowerCase().replace(/_/g, '-');// [cite: 8]
 }
 
-window.copyOrderNumber = function(orderNum) {
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(orderNum);
+window.copyOrderNumber = function (orderNum) {// [cite: 8]
+  if (navigator.clipboard && navigator.clipboard.writeText) {// [cite: 8]
+    navigator.clipboard.writeText(orderNum);// [cite: 8]
   }
-  if (typeof Swal !== 'undefined') {
-    Swal.fire({
-      toast: true,
-      position: 'top-end',
-      icon: 'success',
-      title: 'Order ID copied!',
-      showConfirmButton: false,
-      timer: 1500
+  if (typeof Swal !== 'undefined') {// [cite: 8]
+    Swal.fire({// [cite: 8]
+      toast: true,// [cite: 8]
+      position: 'top-end',// [cite: 8]
+      icon: 'success',// [cite: 8]
+      title: 'Order ID copied!',// [cite: 8]
+      showConfirmButton: false,// [cite: 8]
+      timer: 1500// [cite: 8]
+    });// [cite: 8]
+  }
+};
+
+window.buyAgainOrder = function (rawTitleEncoded) {// [cite: 8]
+  const title = decodeURIComponent(rawTitleEncoded).toLowerCase();// [cite: 8]
+  const match = PRESET_SIGNATURES.find(p => p.title.replace('\n', ' ').toLowerCase() === title);// [cite: 8]
+  if (match) {// [cite: 8]
+    openProductModal(encodeURIComponent(JSON.stringify(match)));// [cite: 8]
+  } else {// [cite: 8]
+    window.location.href = '#drinks';// [cite: 8]
+  }
+};
+
+// GUEST RATING RESTRICTION MODAL
+function showGuestRatingModal() {// [cite: 8]
+  if (typeof Swal !== 'undefined') {// [cite: 8]
+    Swal.fire({// [cite: 8]
+      icon: 'info',// [cite: 8]
+      title: 'Register to Rate',// [cite: 8]
+      html: 'Only registered Marble family members can rate our sips!<br>Sign up now to share your sweet review.',// [cite: 8]
+      showCancelButton: true,// [cite: 8]
+      confirmButtonText: 'Sign Up Now',// [cite: 8]
+      cancelButtonText: 'Maybe Later',// [cite: 8]
+      confirmButtonColor: '#F48A8E',// [cite: 8]
+      cancelButtonColor: '#888'// [cite: 8]
+    }).then((result) => {// [cite: 8]
+      if (result.isConfirmed) {// [cite: 8]
+        window.location.href = 'signup.html';// [cite: 8]
+      }
     });
   }
-};
+}
 
-window.buyAgainOrder = function(rawTitleEncoded) {
-  const title = decodeURIComponent(rawTitleEncoded).toLowerCase();
-  const match = PRESET_SIGNATURES.find(p => p.title.replace('\n', ' ').toLowerCase() === title);
-  if (match) {
-    openProductModal(encodeURIComponent(JSON.stringify(match)));
-  } else {
-    window.location.href = '#drinks';
+window.rateOrderSips = function (orderNumber, rawTitleEncoded) {// [cite: 8]
+  const user = JSON.parse(localStorage.getItem('mm_user') || '{}');// [cite: 8]
+  if (!user || !user.customer_id) {// [cite: 8]
+    showGuestRatingModal();// [cite: 8]
+    return;// [cite: 8]
   }
-};
 
-window.rateOrderSips = function(orderNumber, rawTitleEncoded) {
-  const title = decodeURIComponent(rawTitleEncoded);
-  const match = PRESET_SIGNATURES.find(p => p.title.replace('\n', ' ').toLowerCase() === title.toLowerCase());
-  if (match) {
-    openProductModal(encodeURIComponent(JSON.stringify(match)));
-    setTimeout(() => {
-      const el = document.querySelector('.modal-ratings-section');
-      if (el) el.scrollIntoView({ behavior: 'smooth' });
+  const title = decodeURIComponent(rawTitleEncoded);// [cite: 8]
+  const match = PRESET_SIGNATURES.find(p => p.title.replace('\n', ' ').toLowerCase() === title.toLowerCase());// [cite: 8]
+  if (match) {// [cite: 8]
+    openProductModal(encodeURIComponent(JSON.stringify(match)));// [cite: 8]
+    setTimeout(() => {// [cite: 8]
+      const el = document.querySelector('.modal-ratings-section');// [cite: 8]
+      if (el) el.scrollIntoView({ behavior: 'smooth' });// [cite: 8]
     }, 300);
-  } else {
-    window.location.href = 'orders.html';
+  } else {// [cite: 8]
+    window.location.href = 'orders.html';// [cite: 8]
   }
 };
 
 // ==========================================
 // RECENT ORDERS & SEARCH
 // ==========================================
-async function loadRecentOrders() {
-  const container = document.getElementById('homeOrdersContainer');
-  if (!container) return;
-  const user = JSON.parse(localStorage.getItem('mm_user') || 'null');
+async function loadRecentOrders() {// [cite: 8]
+  const container = document.getElementById('homeOrdersContainer');// [cite: 8]
+  if (!container) return;// [cite: 8]
+  const user = JSON.parse(localStorage.getItem('mm_user') || 'null');// [cite: 8]
 
-  if (!user || !user.customer_id) {
+  if (!user || !user.customer_id) {// [cite: 8]
     container.innerHTML = `
       <div style="text-align: center; padding: 42px 20px; background: #FFFFFF; border-radius: 20px; border: 1.5px solid #FCE1DD; color: #777;">
         <i class="fa-solid fa-receipt" style="font-size: 2.6rem; color: #b8a69d; margin-bottom: 12px;"></i>
@@ -1266,54 +1303,54 @@ async function loadRecentOrders() {
         <p style="font-size: 0.92rem; margin-bottom: 16px; color: #7C4F38;">You are currently browsing as a guest. Log in to track your sweet cups!</p>
         <a href="login.html" style="display: inline-block; padding: 9px 22px; background: #F48A8E; color: #ffffff; text-decoration: none; border-radius: 99px; font-weight: 700;">Log In to View</a>
       </div>
-    `;
-    return;
+    `;// [cite: 8]
+    return;// [cite: 8]
   }
 
-  try {
-    const res = await fetch(`/api/orders/recent?customer_id=${user.customer_id}`);
-    const data = await res.json();
+  try {// [cite: 8]
+    const res = await fetch(`/api/orders/recent?customer_id=${user.customer_id}`);// [cite: 8]
+    const data = await res.json();// [cite: 8]
 
-    if (!data.orders || data.orders.length === 0) {
+    if (!data.orders || data.orders.length === 0) {// [cite: 8]
       container.innerHTML = `
         <div style="text-align: center; padding: 42px 20px; background: #FFFFFF; border-radius: 20px; border: 1.5px solid #FCE1DD;">
           <p style="font-weight: 700; color: #4a3427;">You haven't placed any drink orders yet.</p>
           <a href="#drinks" style="display: inline-block; margin-top: 10px; padding: 8px 20px; background: #F48A8E; color: #fff; border-radius: 99px; text-decoration: none; font-weight:700;">Order a Drink</a>
         </div>
-      `;
-      return;
+      `;// [cite: 8]
+      return;// [cite: 8]
     }
 
-    const cardsHTML = data.orders.map(order => {
-      let totalCups = order.total_cups;
-      if (totalCups === undefined || totalCups === null) {
-        if (Array.isArray(order.items) && order.items.length > 0) {
-          totalCups = order.items.reduce((sum, it) => sum + (parseInt(it.quantity, 10) || 1), 0);
-        } else {
-          totalCups = 1;
+    const cardsHTML = data.orders.map(order => {// [cite: 8]
+      let totalCups = order.total_cups;// [cite: 8]
+      if (totalCups === undefined || totalCups === null) {// [cite: 8]
+        if (Array.isArray(order.items) && order.items.length > 0) {// [cite: 8]
+          totalCups = order.items.reduce((sum, it) => sum + (parseInt(it.quantity, 10) || 1), 0);// [cite: 8]
+        } else {// [cite: 8]
+          totalCups = 1;// [cite: 8]
         }
       }
-      const totalCupsDisplay = `${totalCups} ${totalCups === 1 ? 'Cup' : 'Cups'}`;
+      const totalCupsDisplay = `${totalCups} ${totalCups === 1 ? 'Cup' : 'Cups'}`;// [cite: 8]
 
-      const rawTitle = order.title || (order.items && order.items[0] && order.items[0].item_label) || 'Special Blend Cup';
-      const meta = getOrderDrinkMetadata(rawTitle);
+      const rawTitle = order.title || (order.items && order.items[0] && order.items[0].item_label) || 'Special Blend Cup';// [cite: 8]
+      const meta = getOrderDrinkMetadata(rawTitle);// [cite: 8]
 
-      const rawStatus = order.status || 'PENDING_PAYMENT';
-      const displayStatus = formatOrderStatus(rawStatus);
-      const statusClass = getOrderStatusClass(rawStatus);
+      const rawStatus = order.status || 'PENDING_PAYMENT';// [cite: 8]
+      const displayStatus = formatOrderStatus(rawStatus);// [cite: 8]
+      const statusClass = getOrderStatusClass(rawStatus);// [cite: 8]
 
-      let schedule = order.pickup_date || 'N/A';
-      if (schedule === 'N/A' && order.placed_at) {
-        schedule = new Date(order.placed_at).toISOString().split('T')[0];
+      let schedule = order.pickup_date || 'N/A';// [cite: 8]
+      if (schedule === 'N/A' && order.placed_at) {// [cite: 8]
+        schedule = new Date(order.placed_at).toISOString().split('T')[0];// [cite: 8]
       }
 
-      const isCompleted = displayStatus.toLowerCase() === 'completed';
-      let actionsHTML = '';
-      if (isCompleted) {
+      const isCompleted = displayStatus.toLowerCase() === 'completed';// [cite: 8]
+      let actionsHTML = '';// [cite: 8]
+      if (isCompleted) {// [cite: 8]
         actionsHTML = `
           <button type="button" class="home-btn-action-primary" onclick="event.stopPropagation(); buyAgainOrder('${encodeURIComponent(rawTitle)}')">Buy Again</button>
           <button type="button" class="home-btn-action-secondary" onclick="event.stopPropagation(); rateOrderSips('${order.order_number}', '${encodeURIComponent(rawTitle)}')">Rate your Sips</button>
-        `;
+        `;// [cite: 8]
       }
 
       return `
@@ -1358,212 +1395,277 @@ async function loadRecentOrders() {
             </div>
           </div>
         </article>
-      `;
-    }).join('');
+      `;// [cite: 8]
+    }).join('');// [cite: 8]
 
     container.innerHTML = `
       ${cardsHTML}
       <div class="view-all-container" style="text-align: center; margin-top: 18px;">
         <a href="orders.html" class="btn-view-all">View All Orders</a>
       </div>
-    `;
-  } catch (err) {
-    console.error('Recent orders error:', err);
+    `;// [cite: 8]
+  } catch (err) {// [cite: 8]
+    console.error('Recent orders error:', err);// [cite: 8]
   }
 }
 
-window.filterDrinks = function(q) {
-  const query = (q || '').toLowerCase().trim();
-  document.querySelectorAll('.products-grid .product-card').forEach(card => {
-    const text = card.getAttribute('data-search-keywords') || '';
-    card.style.display = (!query || text.includes(query)) ? '' : 'none';
+window.filterDrinks = function (q) {// [cite: 8]
+  const query = (q || '').toLowerCase().trim();// [cite: 8]
+  document.querySelectorAll('.products-grid .product-card').forEach(card => {// [cite: 8]
+    const text = card.getAttribute('data-search-keywords') || '';// [cite: 8]
+    card.style.display = (!query || text.includes(query)) ? '' : 'none';// [cite: 8]
   });
 };
 
-function updateCartCount() {
-  const countBadge = document.getElementById('navCartCount');
-  if (!countBadge) return;
-  const user = JSON.parse(localStorage.getItem('mm_user') || '{}');
-  const customerId = user.customer_id || 11;
+function updateCartCount() {// [cite: 8]
+  const countBadge = document.getElementById('navCartCount');// [cite: 8]
+  if (!countBadge) return;// [cite: 8]
+  const user = JSON.parse(localStorage.getItem('mm_user') || '{}');// [cite: 8]
+  const customerId = user.customer_id || null;// [cite: 8]
+  const sessionId = !customerId ? getGuestSessionId() : null;// [cite: 8]
 
-  fetch(`/api/cart/count?customer_id=${customerId}`)
-    .then(res => res.json())
-    .then(data => {
-      const count = parseInt(data.count, 10) || 0;
-      countBadge.innerText = count;
-      countBadge.style.display = count > 0 ? 'inline-block' : 'none';
+  const url = customerId// [cite: 8]
+    ? `/api/cart/count?customer_id=${customerId}`// [cite: 8]
+    : `/api/cart/count?session_id=${sessionId}`;// [cite: 8]
+
+  fetch(url)// [cite: 8]
+    .then(res => res.json())// [cite: 8]
+    .then(data => {// [cite: 8]
+      const count = parseInt(data.count, 10) || 0;// [cite: 8]
+      countBadge.innerText = count;// [cite: 8]
+      countBadge.style.display = count > 0 ? 'inline-block' : 'none';// [cite: 8]
     })
-    .catch(() => { countBadge.innerText = 0; });
+    .catch(() => { countBadge.innerText = 0; });// [cite: 8]
 }
 
 // =========================================================================
 // LOYALTY POINTS ENGINE
 // =========================================================================
-let userLoyaltyPoints = 0.0;
-let loyaltyDiscountApplied = 0.0;
+let userLoyaltyPoints = 0.0;// [cite: 8]
+let loyaltyDiscountApplied = 0.0;// [cite: 8]
 
-async function fetchCustomerLoyaltyPoints() {
-  const localUser = JSON.parse(localStorage.getItem('mm_user') || '{}');
-  const customerId = localUser.customer_id || 11;
+async function fetchCustomerLoyaltyPoints() {// [cite: 8]
+  const localUser = JSON.parse(localStorage.getItem('mm_user') || '{}');// [cite: 8]
+  if (!localUser.customer_id) {// [cite: 8]
+    renderLoyaltyPoints(0.0);// [cite: 8]
+    return;// [cite: 8]
+  }
 
-  try {
-    const res = await fetch(`/api/customer/profile?customer_id=${customerId}`);
-    const result = await res.json();
-    if (res.ok && result.status === 'success') {
-      const data = result.data || result.customer || {};
-      userLoyaltyPoints = parseFloat(data.loyalty_points || 0);
-      renderLoyaltyPoints(userLoyaltyPoints);
+  try {// [cite: 8]
+    const res = await fetch(`/api/customer/profile?customer_id=${localUser.customer_id}`);// [cite: 8]
+    const result = await res.json();// [cite: 8]
+    if (res.ok && result.status === 'success') {// [cite: 8]
+      const data = result.data || result.customer || {};// [cite: 8]
+      userLoyaltyPoints = parseFloat(data.loyalty_points || 0);// [cite: 8]
+      renderLoyaltyPoints(userLoyaltyPoints);// [cite: 8]
     }
-  } catch (err) {
-    console.warn('Could not load customer loyalty points:', err);
+  } catch (err) {// [cite: 8]
+    console.warn('Could not load customer loyalty points:', err);// [cite: 8]
   }
 }
 
-function renderLoyaltyPoints(points) {
-  const formattedPts = points.toFixed(1);
-  const pesoVal = (points * 1.0).toFixed(2);
+function renderLoyaltyPoints(points) {// [cite: 8]
+  const formattedPts = points.toFixed(1);// [cite: 8]
+  const pesoVal = (points * 1.0).toFixed(2);// [cite: 8]
 
-  const ptsEl = document.getElementById('displayLoyaltyPoints');
-  const pesoEl = document.getElementById('displayLoyaltyPeso');
-  if (ptsEl) ptsEl.innerText = `${formattedPts} pts`;
-  if (pesoEl) pesoEl.innerText = `(₱${pesoVal})`;
+  const ptsEl = document.getElementById('displayLoyaltyPoints');// [cite: 8]
+  const pesoEl = document.getElementById('displayLoyaltyPeso');// [cite: 8]
+  if (ptsEl) ptsEl.innerText = `${formattedPts} pts`;// [cite: 8]
+  if (pesoEl) pesoEl.innerText = `(₱${pesoVal})`;// [cite: 8]
 
-  const summaryAvail = document.getElementById('summaryLoyaltyAvailable');
-  if (summaryAvail) {
-    summaryAvail.innerText = `Available: ${formattedPts} pts (₱${pesoVal})`;
+  const summaryAvail = document.getElementById('summaryLoyaltyAvailable');// [cite: 8]
+  if (summaryAvail) {// [cite: 8]
+    summaryAvail.innerText = `Available: ${formattedPts} pts (₱${pesoVal})`;// [cite: 8]
   }
 }
-
-window.handleToggleLoyaltyPoints = function(isChecked) {
-  const discountRow = document.getElementById('summaryLoyaltyDiscountRow');
-  const discountValEl = document.getElementById('summaryLoyaltyDiscount');
-  const subtotalEl = document.getElementById('summarySubtotal');
-  const finalTotalEl = document.getElementById('summaryFinalTotal');
-
-  let subtotalNum = 0;
-  if (subtotalEl) {
-    subtotalNum = parseFloat(subtotalEl.innerText.replace(/[^0-9.]/g, '')) || 0;
-  }
-
-  if (isChecked) {
-    if (userLoyaltyPoints <= 0) {
-      if (typeof Swal !== 'undefined') {
-        Swal.fire({
-          icon: 'info',
-          title: 'No Points Available',
-          text: 'You do not have any loyalty points to redeem yet. Every ₱10 spent earns 0.1 points!'
-        });
-      }
-      const toggle = document.getElementById('toggleUseLoyaltyPoints');
-      if (toggle) toggle.checked = false;
-      loyaltyDiscountApplied = 0;
-      if (discountRow) discountRow.style.display = 'none';
-      return;
-    }
-
-    const maxPointsDiscount = userLoyaltyPoints * 1.0;
-    loyaltyDiscountApplied = Math.min(subtotalNum, maxPointsDiscount);
-
-    if (discountRow) discountRow.style.display = 'flex';
-    if (discountValEl) discountValEl.innerText = `- ₱ ${loyaltyDiscountApplied.toFixed(2)}`;
-  } else {
-    loyaltyDiscountApplied = 0;
-    if (discountRow) discountRow.style.display = 'none';
-  }
-
-  const promoDiscountEl = document.getElementById('summaryDiscount');
-  let promoDiscount = 0;
-  if (promoDiscountEl) {
-    promoDiscount = parseFloat(promoDiscountEl.innerText.replace(/[^0-9.]/g, '')) || 0;
-  }
-
-  const newFinal = Math.max(0, subtotalNum - promoDiscount - loyaltyDiscountApplied);
-  if (finalTotalEl) {
-    finalTotalEl.innerText = `₱ ${newFinal.toFixed(2)}`;
-  }
-};
-
-const originalProceedToOrderSummary = window.proceedToOrderSummary;
-window.proceedToOrderSummary = function() {
-  loyaltyDiscountApplied = 0.0;
-  const toggle = document.getElementById('toggleUseLoyaltyPoints');
-  if (toggle) toggle.checked = false;
-  const discountRow = document.getElementById('summaryLoyaltyDiscountRow');
-  if (discountRow) discountRow.style.display = 'none';
-  fetchCustomerLoyaltyPoints();
-  if (typeof originalProceedToOrderSummary === 'function') {
-    originalProceedToOrderSummary();
-  }
-};
-
-const originalProceedCustomOrderSummary = window.proceedCustomOrderSummary;
-window.proceedCustomOrderSummary = function() {
-  loyaltyDiscountApplied = 0.0;
-  const toggle = document.getElementById('toggleUseLoyaltyPoints');
-  if (toggle) toggle.checked = false;
-  const discountRow = document.getElementById('summaryLoyaltyDiscountRow');
-  if (discountRow) discountRow.style.display = 'none';
-  fetchCustomerLoyaltyPoints();
-  if (typeof originalProceedCustomOrderSummary === 'function') {
-    originalProceedCustomOrderSummary();
-  }
-};
 
 // ==========================================
 // WELCOME BACK MODAL ENGINE
 // ==========================================
-function checkWelcomeBackModal() {
-  const userRaw = localStorage.getItem('mm_user');
-  if (!userRaw) return;
+function checkWelcomeBackModal() {// [cite: 8]
+  const userRaw = localStorage.getItem('mm_user');// [cite: 8]
+  if (!userRaw) return;// [cite: 8]
 
-  try {
-    const user = JSON.parse(userRaw);
-    const displayName = user.full_name || user.username || 'Sample User';
+  try {// [cite: 8]
+    const user = JSON.parse(userRaw);// [cite: 8]
+    if (!user.customer_id) return; // Wag ipakita sa guest// [cite: 8]
 
-    const alreadyWelcomed = sessionStorage.getItem('mm_welcomed');
-    const urlParams = new URLSearchParams(window.location.search);
-    const isFromLogin = urlParams.get('login') === 'success' || sessionStorage.getItem('just_logged_in') === 'true';
+    const displayName = user.full_name || user.username || 'Sample User';// [cite: 8]
 
-    if (!alreadyWelcomed || isFromLogin) {
-      sessionStorage.setItem('mm_welcomed', 'true');
-      sessionStorage.removeItem('just_logged_in');
+    const alreadyWelcomed = sessionStorage.getItem('mm_welcomed');// [cite: 8]
+    const urlParams = new URLSearchParams(window.location.search);// [cite: 8]
+    const isFromLogin = urlParams.get('login') === 'success' || sessionStorage.getItem('just_logged_in') === 'true';// [cite: 8]
 
-      if (urlParams.has('login')) {
-        window.history.replaceState({}, document.title, window.location.pathname);
+    if (!alreadyWelcomed || isFromLogin) {// [cite: 8]
+      sessionStorage.setItem('mm_welcomed', 'true');// [cite: 8]
+      sessionStorage.removeItem('just_logged_in');// [cite: 8]
+
+      if (urlParams.has('login')) {// [cite: 8]
+        window.history.replaceState({}, document.title, window.location.pathname);// [cite: 8]
       }
 
-      showSweetAlert({
-        icon: 'success',
-        title: 'Welcome Back!',
-        html: `Yay, you're logged in as <strong>${displayName}</strong>!<br>Ready to pop the straw and build your sweet sips?`,
-        showCancelButton: true,
-        confirmButtonText: "Let's Sip!",
-        cancelButtonText: 'Cancel',
-        reverseButtons: false,
-        focusConfirm: false
-      }).then((result) => {
-        if (result.isConfirmed) {
-          const drinksSection = document.getElementById('drinks');
-          if (drinksSection) {
-            drinksSection.scrollIntoView({ behavior: 'smooth' });
+      showSweetAlert({// [cite: 8]
+        icon: 'success',// [cite: 8]
+        title: 'Welcome Back!',// [cite: 8]
+        html: `Yay, you're logged in as <strong>${displayName}</strong>!<br>Ready to pop the straw and build your sweet sips?`,// [cite: 8]
+        showCancelButton: false,// [cite: 8]
+        confirmButtonText: "Let's Sip!",// [cite: 8]
+        reverseButtons: false,// [cite: 8]
+        focusConfirm: false,// [cite: 8]
+        didOpen: () => {// [cite: 8]
+          const cancelBtn = document.querySelector('.mm-swal-cancel-btn');// [cite: 8]
+          if (cancelBtn) {// [cite: 8]
+            cancelBtn.style.setProperty('display', 'none', 'important');// [cite: 8]
+          }
+        }
+      }).then((result) => {// [cite: 8]
+        if (result.isConfirmed) {// [cite: 8]
+          const drinksSection = document.getElementById('drinks');// [cite: 8]
+          if (drinksSection) {// [cite: 8]
+            drinksSection.scrollIntoView({ behavior: 'smooth' });// [cite: 8]
           }
         }
       });
     }
-  } catch (err) {
-    console.error('Error showing welcome popup:', err);
+  } catch (err) {// [cite: 8]
+    console.error('Error showing welcome popup:', err);// [cite: 8]
   }
 }
 
 // ==========================================
-// INITIALIZATION
+// INITIALIZATION & AVATAR / DROPDOWN HANDLER
 // ==========================================
-document.addEventListener('DOMContentLoaded', () => {
-  renderSignatureDrinks();
-  loadLiveRatingsSummary();
-  renderCustomizerUI();
-  loadRecentOrders();
-  updateCartCount();
-  fetchCustomerLoyaltyPoints();
-  checkWelcomeBackModal();
+document.addEventListener('DOMContentLoaded', () => {// [cite: 8]
+  renderSignatureDrinks();// [cite: 8]
+  loadLiveRatingsSummary();// [cite: 8]
+  renderCustomizerUI();// [cite: 8]
+  loadRecentOrders();// [cite: 8]
+  updateCartCount();// [cite: 8]
+  fetchCustomerLoyaltyPoints();// [cite: 8]
+  checkWelcomeBackModal();// [cite: 8]
+
+  // Event listener for user slot / dropdown menu// [cite: 8]
+  const navSlot = document.getElementById('navUserSlot');// [cite: 8]
+  if (navSlot) {// [cite: 8]
+    navSlot.addEventListener('click', (e) => {// [cite: 8]
+      const localUser = JSON.parse(localStorage.getItem('mm_user') || '{}');// [cite: 8]
+
+      // 1. REGISTERED USER: Handle dropdown item clicks// [cite: 8]
+      if (localUser.customer_id) {// [cite: 8]
+        // Trigger SweetAlert confirmation specifically when clicking 'Logout' inside the dropdown// [cite: 8]
+        const logoutItem = e.target.closest('.logout-btn, #btnLogout, [href*="logout"], .dropdown-logout');// [cite: 8]
+        if (logoutItem || e.target.innerText.trim().toLowerCase() === 'logout') {// [cite: 8]
+          e.preventDefault();// [cite: 8]
+          e.stopPropagation();// [cite: 8]
+          confirmUserLogout();// [cite: 8]
+          return;// [cite: 8]
+        }
+
+        // Allow default link navigation for 'My Profile' and 'Account Settings'// [cite: 8]
+        const linkItem = e.target.closest('a');// [cite: 8]
+        if (linkItem) {// [cite: 8]
+          return;// [cite: 8]
+        }
+
+        // Toggle dropdown menu visibility if clicking avatar trigger// [cite: 8]
+        const dropdownMenu = navSlot.querySelector('.nav-user-dropdown, .user-menu-dropdown, .dropdown-card');// [cite: 8]
+        if (dropdownMenu && e.target.closest('.nav-user-avatar, .user-avatar, img')) {// [cite: 8]
+          dropdownMenu.classList.toggle('active');// [cite: 8]
+          dropdownMenu.classList.toggle('show');// [cite: 8]
+        }
+        return;// [cite: 8]
+      }
+
+      // 2. GUEST USER: Open Guest Session SweetAlert Modal// [cite: 8]
+      e.preventDefault();// [cite: 8]
+      e.stopPropagation();// [cite: 8]
+      window.handleAvatarClick(e);// [cite: 8]
+    });
+  }
 });
+
+// Dedicated Logout Confirmation Modal for Registered Users// [cite: 8]
+function confirmUserLogout() {// [cite: 8]
+  showSweetAlert({// [cite: 8]
+    title: 'Confirm Log Out',// [cite: 8]
+    html: `
+      <div class="mm-swal-thumb-box" style="background: #FFF0EE;">
+        <i class="fa-solid fa-right-from-bracket" style="font-size: 38px; color: #F48A8E;"></i>
+      </div>
+      <div class="mm-swal-item-name">Logging Out?</div>
+      <p class="mm-swal-item-sub">Are you sure you want to log out of your account?</p>
+    `,// [cite: 8]
+    showCancelButton: true,// [cite: 8]
+    confirmButtonText: 'Yes, Log Out',// [cite: 8]
+    cancelButtonText: 'Cancel',// [cite: 8]
+    reverseButtons: true// [cite: 8]
+  }).then((logoutConfirm) => {// [cite: 8]
+    if (logoutConfirm.isConfirmed) {// [cite: 8]
+      localStorage.removeItem('mm_user');// [cite: 8]
+      sessionStorage.removeItem('mm_welcomed');// [cite: 8]
+      window.location.href = 'login.html';// [cite: 8]
+    }
+  });
+}
+
+// Handler for Guest Session / Avatar Click// [cite: 8]
+window.handleAvatarClick = function (e) {// [cite: 8]
+  if (e) e.preventDefault();// [cite: 8]
+
+  const localUser = JSON.parse(localStorage.getItem('mm_user') || '{}');// [cite: 8]
+
+  // If registered user clicks avatar, toggle dropdown menu// [cite: 8]
+  if (localUser.customer_id) {// [cite: 8]
+    const dropdown = document.querySelector('.nav-user-dropdown, .user-menu-dropdown, .dropdown-card');// [cite: 8]
+    if (dropdown) {// [cite: 8]
+      dropdown.classList.toggle('active');// [cite: 8]
+      dropdown.classList.toggle('show');// [cite: 8]
+    } else {// [cite: 8]
+      window.location.href = 'profile.html';// [cite: 8]
+    }
+    return;// [cite: 8]
+  }
+
+  // Guest User Modal// [cite: 8]
+  showSweetAlert({// [cite: 8]
+    title: 'Guest Session',// [cite: 8]
+    html: `
+      <div class="mm-swal-thumb-box">
+        <i class="fa-solid fa-user-gear" style="font-size: 38px; color: #F48A8E;"></i>
+      </div>
+      <div class="mm-swal-item-name">Browsing as Guest</div>
+      <p class="mm-swal-item-sub">You are currently browsing as a guest. Would you like to create an account or exit your guest session?</p>
+    `,// [cite: 8]
+    showCancelButton: true,// [cite: 8]
+    confirmButtonText: 'Sign Up',// [cite: 8]
+    cancelButtonText: 'Exit Guest',// [cite: 8]
+    reverseButtons: true// [cite: 8]
+  }).then((result) => {// [cite: 8]
+    if (result.isConfirmed) {// [cite: 8]
+      window.location.href = 'signup.html';// [cite: 8]
+    } else if (result.dismiss === Swal.DismissReason.cancel) {// [cite: 8]
+      showSweetAlert({// [cite: 8]
+        title: 'Confirm Exit',// [cite: 8]
+        html: `
+          <div class="mm-swal-thumb-box" style="background: #FFF0EE;">
+            <i class="fa-solid fa-arrow-right-from-bracket" style="font-size: 38px; color: #F48A8E;"></i>
+          </div>
+          <div class="mm-swal-item-name">Exit Guest Session?</div>
+          <p class="mm-swal-item-sub">Are you sure you want to exit? Exiting will clear your guest session and current cart.</p>
+        `,// [cite: 8]
+        showCancelButton: true,// [cite: 8]
+        confirmButtonText: 'Yes, Exit',// [cite: 8]
+        cancelButtonText: 'Stay as Guest',// [cite: 8]
+        reverseButtons: true// [cite: 8]
+      }).then((exitConfirm) => {// [cite: 8]
+        if (exitConfirm.isConfirmed) {// [cite: 8]
+          // Wipe all guest session & local cart data
+          localStorage.removeItem('mm_guest_session_id');// [cite: 8]
+          localStorage.removeItem('mm_guest_recipient');// [cite: 8]
+          localStorage.removeItem('mm_cart');
+          window.location.href = 'index.html';// [cite: 8]
+        }
+      });
+    }
+  });
+};

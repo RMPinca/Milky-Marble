@@ -1,17 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="only light">
   <title>Milky Marble - Customer Portal</title>
-  
+
   <!-- Fonts & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Sniglet:wght@400;800&family=Urbanist:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Sniglet:wght@400;800&family=Urbanist:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
+
   <!-- Stylesheets -->
   <link rel="stylesheet" href="css/navbar.css">
   <link rel="stylesheet" href="css/home.css">
@@ -22,48 +25,49 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
+
 <body>
 
   <!-- NAVBAR COMPONENT -->
-  <header class="navbar-wrapper" data-current-page="home"> 
+  <header class="navbar-wrapper" data-current-page="home">
     <div class="navbar-container">
       <a href="home.html#drinks" class="brand-container-nav" id="mainBrandContainer">
-        <img src="images/logo.png" alt="Milky Marble Logo" class="brand-logo-img-nav"> 
-        <span class="brand-name-nav">Milky Marble</span> 
+        <img src="images/logo.png" alt="Milky Marble Logo" class="brand-logo-img-nav">
+        <span class="brand-name-nav">Milky Marble</span>
       </a>
 
       <!-- Desktop Navigation Menu -->
       <nav class="nav-pill-menu desktop-nav-menu" id="mainNavPills">
         <a href="#drinks" class="nav-pill-link active" id="nav-drinks" data-nav="drinks">
-          <i class="fa-solid fa-mug-hot"></i> 
+          <i class="fa-solid fa-mug-hot"></i>
           <span>Drinks</span>
-        </a> 
+        </a>
         <a href="#customize" class="nav-pill-link" id="nav-customize" data-nav="customize">
-          <i class="fa-solid fa-shapes"></i> 
+          <i class="fa-solid fa-shapes"></i>
           <span>Customize</span>
-        </a> 
+        </a>
         <a href="orders.html" class="nav-pill-link" id="nav-orders" data-nav="orders">
-          <i class="fa-solid fa-tags"></i> 
+          <i class="fa-solid fa-tags"></i>
           <span>Orders</span>
-        </a> 
+        </a>
         <a href="#about" class="nav-pill-link" id="nav-about" data-nav="about">
-          <i class="fa-solid fa-circle-info"></i> 
+          <i class="fa-solid fa-circle-info"></i>
           <span>About</span>
-        </a> 
+        </a>
       </nav>
 
       <div class="nav-actions">
         <div class="nav-search-box" id="globalNavSearchBox">
-          <input type="text" id="globalNavSearchInput" placeholder="Search for anything..." aria-label="Search"> 
+          <input type="text" id="globalNavSearchInput" placeholder="Search for anything..." aria-label="Search">
           <button type="button" class="search-icon-btn" id="globalNavSearchBtn" title="Search">
             <i class="fa-solid fa-magnifying-glass"></i>
-          </button> 
+          </button>
         </div>
-        
+
         <a href="cart.html" class="nav-icon-btn" title="Shopping Cart">
           <i class="fa-solid fa-cart-shopping"></i>
           <span class="nav-cart-badge" id="navCartCount" style="display: none;">0</span>
-        </a> 
+        </a>
 
         <div class="nav-notif-container" id="navNotifContainer"></div>
         <div class="nav-user-slot" id="navUserSlot"></div>
@@ -74,32 +78,32 @@
   <!-- MOBILE BOTTOM NAV -->
   <nav class="mobile-bottom-nav" id="mobileBottomNav" aria-label="Mobile Navigation">
     <a href="#drinks" class="nav-pill-link active" id="m-nav-drinks" data-nav="drinks">
-      <i class="fa-solid fa-mug-hot"></i> 
+      <i class="fa-solid fa-mug-hot"></i>
       <span>Drinks</span>
-    </a> 
+    </a>
     <a href="#customize" class="nav-pill-link" id="m-nav-customize" data-nav="customize">
-      <i class="fa-solid fa-shapes"></i> 
+      <i class="fa-solid fa-shapes"></i>
       <span>Customize</span>
-    </a> 
+    </a>
     <a href="orders.html" class="nav-pill-link" id="m-nav-orders" data-nav="orders">
-      <i class="fa-solid fa-tags"></i> 
+      <i class="fa-solid fa-tags"></i>
       <span>Orders</span>
-    </a> 
+    </a>
     <a href="#about" class="nav-pill-link" id="m-nav-about" data-nav="about">
-      <i class="fa-solid fa-circle-info"></i> 
+      <i class="fa-solid fa-circle-info"></i>
       <span>About</span>
-    </a> 
+    </a>
   </nav>
 
   <main class="content-wrapper">
-    
+
     <!-- SECTION 1: DRINKS / SIGNATURES -->
     <section id="drinks" class="page-section section-drinks">
       <div class="section-title-box signatures-header-wrapper">
         <div class="title-text-group">
           <h1 class="main-heading">Sip the Signatures</h1>
           <p class="sub-heading">Pop the straw and enjoy our most-loved mixups!</p>
-        </div> 
+        </div>
 
         <!-- Loyalty Points Badge Box (Pic 1) -->
         <div class="loyalty-points-badge-box" id="headerLoyaltyBox">
@@ -114,7 +118,7 @@
             </div>
           </div>
         </div>
-      </div> 
+      </div>
 
       <div class="products-grid" id="productsGridContainer"></div>
     </section>
@@ -124,7 +128,7 @@
       <div class="section-title-box">
         <h1 class="main-heading">Can’t Find Your Sweet Match?</h1>
         <p class="sub-heading">Build your own cup from base to toppings!</p>
-      </div> 
+      </div>
 
       <div class="customizer-card">
         <aside class="customizer-sidebar">
@@ -133,11 +137,11 @@
           <div class="customizer-sidebar-bottom">
             <div class="customizer-price-row">
               <span class="custom-total-label">Total Price:</span>
-              <span class="custom-total-val" id="customTotalPrice">₱ 19.00</span> 
+              <span class="custom-total-val" id="customTotalPrice">₱ 19.00</span>
             </div>
             <div class="customizer-actions-row">
-              <button type="button" class="btn-custom-buy" onclick="proceedCustomOrderSummary()">Buy Now</button> 
-              <button type="button" class="btn-custom-cart" title="Add to Cart" onclick="addCustomCupToCart()"> 
+              <button type="button" class="btn-custom-buy" onclick="proceedCustomOrderSummary()">Buy Now</button>
+              <button type="button" class="btn-custom-cart" title="Add to Cart" onclick="addCustomCupToCart()">
                 <i class="fa-solid fa-cart-plus"></i>
               </button>
             </div>
@@ -147,37 +151,41 @@
         <div class="customizer-canvas">
           <div class="canvas-header-stack">
             <h2 class="canvas-item-title" id="canvasTitle">12oz Pandan Jelly Cubes</h2>
-            <div class="canvas-sub-toppings" id="canvasToppingsSubtitle" style="display: none;"></div> 
-            <div class="canvas-sub-addons" id="canvasAddonsSubtitle" style="display: none;"></div> 
+            <div class="canvas-sub-toppings" id="canvasToppingsSubtitle" style="display: none;"></div>
+            <div class="canvas-sub-addons" id="canvasAddonsSubtitle" style="display: none;"></div>
           </div>
 
           <div class="customizer-stage-display">
-            <button type="button" class="carousel-nav-btn prev-btn desktop-arrow" onclick="prevCustomizerChoice()" title="Previous Choice"> 
+            <button type="button" class="carousel-nav-btn prev-btn desktop-arrow" onclick="prevCustomizerChoice()"
+              title="Previous Choice">
               <i class="fa-solid fa-arrow-left"></i>
             </button>
 
-            <div class="customizer-items-row" id="stageItemsContainer"></div> 
+            <div class="customizer-items-row" id="stageItemsContainer"></div>
 
-            <button type="button" class="carousel-nav-btn next-btn desktop-arrow" onclick="nextCustomizerChoice()" title="Next Choice"> 
+            <button type="button" class="carousel-nav-btn next-btn desktop-arrow" onclick="nextCustomizerChoice()"
+              title="Next Choice">
               <i class="fa-solid fa-arrow-right"></i>
             </button>
           </div>
 
           <div class="mobile-carousel-arrows-row">
-            <button type="button" class="carousel-nav-btn prev-btn" onclick="prevCustomizerChoice()" title="Previous Choice"> 
+            <button type="button" class="carousel-nav-btn prev-btn" onclick="prevCustomizerChoice()"
+              title="Previous Choice">
               <i class="fa-solid fa-arrow-left"></i>
             </button>
-            <button type="button" class="carousel-nav-btn next-btn" onclick="nextCustomizerChoice()" title="Next Choice"> 
+            <button type="button" class="carousel-nav-btn next-btn" onclick="nextCustomizerChoice()"
+              title="Next Choice">
               <i class="fa-solid fa-arrow-right"></i>
             </button>
           </div>
 
           <div class="stage-nav-pills" id="stageNavPills">
-            <button type="button" class="stage-pill active" onclick="switchCustomStage('cup')">Cup</button> 
-            <button type="button" class="stage-pill" onclick="switchCustomStage('flavor')">Flavor</button> 
-            <button type="button" class="stage-pill" onclick="switchCustomStage('jelly')">Jelly</button> 
-            <button type="button" class="stage-pill" onclick="switchCustomStage('toppings')">Toppings</button> 
-            <button type="button" class="stage-pill" onclick="switchCustomStage('addons')">Add ons</button> 
+            <button type="button" class="stage-pill active" onclick="switchCustomStage('cup')">Cup</button>
+            <button type="button" class="stage-pill" onclick="switchCustomStage('flavor')">Flavor</button>
+            <button type="button" class="stage-pill" onclick="switchCustomStage('jelly')">Jelly</button>
+            <button type="button" class="stage-pill" onclick="switchCustomStage('toppings')">Toppings</button>
+            <button type="button" class="stage-pill" onclick="switchCustomStage('addons')">Add ons</button>
           </div>
         </div>
       </div>
@@ -188,7 +196,7 @@
       <div class="section-title-box">
         <h1 class="main-heading">Recent Orders</h1>
         <p class="sub-heading">Track your freshly layered cups or view their full order status!</p>
-      </div> 
+      </div>
 
       <div class="home-orders-list-container" id="homeOrdersContainer"></div>
     </section>
@@ -198,18 +206,16 @@
       <div class="section-title-box">
         <h1 class="main-heading">See the Marble Bar in Action!</h1>
         <p class="sub-heading">Freshly layered dessert cups & handcrafted bouncy sips.</p>
-      </div> 
+      </div>
 
       <div class="about-grid-container">
         <div class="reel-frame-container desktop-reel">
           <div class="reel-card">
-            <iframe 
-              src="https://www.facebook.com/plugins/video.php?height=590&href=https%3A%2F%2Fwww.facebook.com%2Freel%2F1798203484934463%2F&show_text=false&width=330&t=0" 
-              class="reel-iframe" 
-              scrolling="no" 
-              allowfullscreen="true" 
+            <iframe
+              src="https://www.facebook.com/plugins/video.php?height=590&href=https%3A%2F%2Fwww.facebook.com%2Freel%2F1798203484934463%2F&show_text=false&width=330&t=0"
+              class="reel-iframe" scrolling="no" allowfullscreen="true"
               allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share">
-            </iframe> 
+            </iframe>
           </div>
         </div>
 
@@ -219,7 +225,9 @@
               <div class="feature-num-badge">01</div>
               <div class="feature-text-block">
                 <h3 class="feature-title">Handcrafted Daily at the Marble Bar</h3>
-                <p class="feature-desc">Every cup starts fresh. From our rich, chilled milk blends to our syrups and toppings, we assemble each order layer by layer so you get the perfect creamy balance in every sip.</p>
+                <p class="feature-desc">Every cup starts fresh. From our rich, chilled milk blends to our syrups and
+                  toppings, we assemble each order layer by layer so you get the perfect creamy balance in every sip.
+                </p>
               </div>
             </div>
 
@@ -227,7 +235,8 @@
               <div class="feature-num-badge">02</div>
               <div class="feature-text-block">
                 <h3 class="feature-title">Signature Bouncy Jelly Cuts</h3>
-                <p class="feature-desc">Texture is everything. We handcraft playful, squiggly jelly cuts daily—designed to give you that satisfying chewy bite alongside our smooth milk base.</p>
+                <p class="feature-desc">Texture is everything. We handcraft playful, squiggly jelly cuts daily—designed
+                  to give you that satisfying chewy bite alongside our smooth milk base.</p>
               </div>
             </div>
 
@@ -235,7 +244,8 @@
               <div class="feature-num-badge">03</div>
               <div class="feature-text-block">
                 <h3 class="feature-title">Made for Your Feed</h3>
-                <p class="feature-desc">We believe treats should look just as good as they taste. Watch our daily prep ASMR, behind-the-counter slicing, and secret flavor drops on our socials.</p>
+                <p class="feature-desc">We believe treats should look just as good as they taste. Watch our daily prep
+                  ASMR, behind-the-counter slicing, and secret flavor drops on our socials.</p>
               </div>
             </div>
 
@@ -243,24 +253,29 @@
               <div class="feature-num-badge">04</div>
               <div class="feature-text-block">
                 <h3 class="feature-title">Sips Built by You</h3>
-                <p class="feature-desc">Pick your base, choose your favorite jelly cuts, and customize your sweetness. Your sweet fix is always made just the way you like it.</p>
+                <p class="feature-desc">Pick your base, choose your favorite jelly cuts, and customize your sweetness.
+                  Your sweet fix is always made just the way you like it.</p>
               </div>
             </div>
           </div>
 
           <div class="about-social-callout">
             <p class="social-tagline">
-              Got your cup? Snap your layers, tag <em>@milkymarble.ph</em>, and use <strong>#MyMarbleSip</strong> to get featured on our page!
+              Got your cup? Snap your layers, tag <em>@milkymarble.ph</em>, and use <strong>#MyMarbleSip</strong> to get
+              featured on our page!
             </p>
-            
+
             <div class="social-links-row">
-              <a href="https://www.instagram.com/_milkymarble/" target="_blank" rel="noopener noreferrer" class="social-btn social-ig" title="Instagram">
+              <a href="https://www.instagram.com/_milkymarble/" target="_blank" rel="noopener noreferrer"
+                class="social-btn social-ig" title="Instagram">
                 <i class="fa-brands fa-instagram"></i>
               </a>
-              <a href="https://www.facebook.com/milkymarble" target="_blank" rel="noopener noreferrer" class="social-btn social-fb" title="Facebook">
+              <a href="https://www.facebook.com/milkymarble" target="_blank" rel="noopener noreferrer"
+                class="social-btn social-fb" title="Facebook">
                 <i class="fa-brands fa-facebook-f"></i>
               </a>
-              <a href="https://www.tiktok.com/@_milkymarble" target="_blank" rel="noopener noreferrer" class="social-btn social-tt" title="TikTok">
+              <a href="https://www.tiktok.com/@_milkymarble" target="_blank" rel="noopener noreferrer"
+                class="social-btn social-tt" title="TikTok">
                 <i class="fa-brands fa-tiktok"></i>
               </a>
             </div>
@@ -311,7 +326,8 @@
               <button type="button" class="size-pill" onclick="selectModalSize('8oz', this)">8oz</button>
               <button type="button" class="size-pill" onclick="selectModalSize('12oz', this)">12oz</button>
             </div>
-            <span id="modalSizeRequiredMsg" class="modal-size-error-msg">Please choose a cup size before proceeding.</span>
+            <span id="modalSizeRequiredMsg" class="modal-size-error-msg">Please choose a cup size before
+              proceeding.</span>
           </div>
 
           <div class="modal-config-group">
@@ -335,7 +351,7 @@
       <!-- RATINGS & REVIEWS SECTION (EXACT AS SCREENSHOT) -->
       <div class="modal-ratings-section">
         <h3 class="modal-ratings-heading">Ratings</h3>
-        
+
         <div class="modal-ratings-summary">
           <div class="modal-score-box">
             <span class="score-num" id="modalReviewScore">0.0</span>
@@ -375,17 +391,20 @@
 
       <!-- Pick-up Date Block -->
       <div class="summary-section-block">
-        <h3 class="summary-section-title">Pick-up Date <span style="font-size: 11px; font-weight: 500; color: #7C4F38;">(Mon, Tue, & Thu only)</span></h3>
+        <h3 class="summary-section-title">Pick-up Date <span
+            style="font-size: 11px; font-weight: 500; color: #7C4F38;">(Mon, Tue, & Thu only)</span></h3>
         <div class="recipient-input-card" style="padding: 10px 16px;">
           <input type="date" id="pickupDateInput" class="pickup-date-control" onchange="validatePickupDate(this)">
           <button type="button" class="btn-calendar-trigger" title="Choose pick-up date" onclick="openDatePicker()">
             <i class="fa-regular fa-calendar"></i>
           </button>
         </div>
-        <span id="dateRequiredMsg" style="display: none; color: #d32f2f; font-size: 12px; font-weight: 600; margin-top: 6px;">
+        <span id="dateRequiredMsg"
+          style="display: none; color: #d32f2f; font-size: 12px; font-weight: 600; margin-top: 6px;">
           Please select a valid pick-up date before placing your order.
         </span>
-        <span id="dateErrorMsg" style="display: none; color: #d32f2f; font-size: 12px; font-weight: 600; margin-top: 6px;">
+        <span id="dateErrorMsg"
+          style="display: none; color: #d32f2f; font-size: 12px; font-weight: 600; margin-top: 6px;">
           Pick-ups are only available on Monday, Tuesday, and Thursday.
         </span>
       </div>
@@ -406,13 +425,15 @@
               <i class="fa-solid fa-paper-plane"></i>
             </button>
           </div>
-          <span id="promoAppliedMsg" style="display: none; font-size: 12px; font-weight: 600; color: #2e7d32; margin-top: 4px;"></span>
+          <span id="promoAppliedMsg"
+            style="display: none; font-size: 12px; font-weight: 600; color: #2e7d32; margin-top: 4px;"></span>
         </div>
 
         <div class="summary-split-col">
           <h3 class="summary-section-title">Payment Method</h3>
           <div class="payment-pills-row">
-            <button type="button" class="payment-method-pill active" onclick="selectPaymentMethod(this)">Cash on Pick-Up</button>
+            <button type="button" class="payment-method-pill active" onclick="selectPaymentMethod(this)">Cash on
+              Pick-Up</button>
             <button type="button" class="payment-method-pill" onclick="selectPaymentMethod(this)">E-Wallet</button>
           </div>
         </div>
@@ -463,7 +484,8 @@
       </div>
 
       <div class="summary-action-box">
-        <button type="button" class="btn-place-order" id="btnPlaceOrderSubmit" onclick="confirmPlaceOrder()">Place Order</button>
+        <button type="button" class="btn-place-order" id="btnPlaceOrderSubmit" onclick="confirmPlaceOrder()">Place
+          Order</button>
       </div>
     </div>
   </div>
@@ -485,7 +507,8 @@
           <label for="inputRecipientName" class="recipient-form-label">Full Name</label>
           <div class="recipient-input-wrapper">
             <i class="fa-regular fa-user input-icon"></i>
-            <input type="text" id="inputRecipientName" class="recipient-input-field" placeholder="e.g. Juan Dela Cruz" required maxlength="60" autocomplete="name">
+            <input type="text" id="inputRecipientName" class="recipient-input-field" placeholder="e.g. Juan Dela Cruz"
+              required maxlength="60" autocomplete="name">
           </div>
         </div>
 
@@ -493,7 +516,8 @@
           <label for="inputRecipientEmail" class="recipient-form-label">Email Address</label>
           <div class="recipient-input-wrapper">
             <i class="fa-regular fa-envelope input-icon"></i>
-            <input type="email" id="inputRecipientEmail" class="recipient-input-field" placeholder="e.g. juandelacruz@gmail.com" required autocomplete="email">
+            <input type="email" id="inputRecipientEmail" class="recipient-input-field"
+              placeholder="e.g. juandelacruz@gmail.com" required autocomplete="email">
           </div>
         </div>
 
@@ -510,4 +534,5 @@
   <script src="js/orderSummary.js"></script>
   <script src="js/home.js"></script>
 </body>
+
 </html>

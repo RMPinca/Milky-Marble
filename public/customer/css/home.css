@@ -24,31 +24,31 @@
     --bg-review-card: #FDE9E6;
     --bg-summary-inner: #FDE8E5;
     --bg-addon-card: #FFF2F1;
-    
+
     --primary-pink: #F69299;
     --btn-buy-pink: #F48A8E;
     --btn-cart-pink: #FBB8B7;
     --btn-sidebar-cart: #FBD4D1;
     --btn-view-all: #F68B90;
-    
+
     --status-confirmed: #F48A8E;
     --status-preparing: #E28A47;
     --status-pickup: #8BB35C;
     --status-completed: #664638;
-    
+
     --stage-pill-active: #664638;
     --stage-pill-inactive: #FDE2DF;
-    
+
     --text-dark: #594A42;
     --text-muted: #7C4F38;
     --star-gold: #e2a03f;
-    
+
     --radius-card: 24px;
     --radius-customizer: 28px;
     --radius-order-card: 20px;
     --radius-modal: 28px;
     --radius-reel: 24px;
-    
+
     --font-logo: 'Kawaii RT - Mona', 'Sniglet', 'Fredoka', cursive, sans-serif;
     --font-header: 'Bootzy TM', 'Urbanist', sans-serif;
     --font-body: 'Urbanist', sans-serif;
@@ -71,6 +71,7 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    margin: 50px 0 0 0;
 }
 
 .content-wrapper {
@@ -421,7 +422,7 @@ body {
     transition: all 0.2s ease;
 }
 
-.custom-radio-label input[type="radio"]:checked + .radio-mark::after {
+.custom-radio-label input[type="radio"]:checked+.radio-mark::after {
     content: "";
     width: 9px;
     height: 9px;
@@ -634,6 +635,7 @@ body {
 }
 
 @media (hover: hover) and (pointer: fine) {
+
     .btn-custom-buy:hover,
     .btn-custom-cart:hover {
         opacity: 0.9;
@@ -1090,6 +1092,7 @@ body {
 }
 
 @media (hover: hover) and (pointer: fine) {
+
     .home-btn-action-primary:hover,
     .home-btn-action-secondary:hover {
         opacity: 0.9;
@@ -1214,12 +1217,12 @@ body {
     font-size: 42px;
     color: #F8B4B7;
     -webkit-text-stroke: 1.5px #7C4F38;
-    text-shadow: 
+    text-shadow:
         -1.5px -1.5px 0 #7C4F38,
-         1.5px -1.5px 0 #7C4F38,
-        -1.5px  1.5px 0 #7C4F38,
-         1.5px  1.5px 0 #7C4F38,
-         2px 4px 0 #594A42;
+        1.5px -1.5px 0 #7C4F38,
+        -1.5px 1.5px 0 #7C4F38,
+        1.5px 1.5px 0 #7C4F38,
+        2px 4px 0 #594A42;
     line-height: 1;
     min-width: 56px;
     flex-shrink: 0;
@@ -1623,6 +1626,7 @@ body {
 }
 
 @media (hover: hover) and (pointer: fine) {
+
     .btn-modal-buy:hover,
     .btn-modal-cart:hover {
         opacity: 0.9;
@@ -2363,48 +2367,48 @@ body {
    ORDERS COMPOSITE THUMBNAIL (HOME & CARDS)
    =================================================== */
 .orders-composite-thumb {
-  position: relative;
-  width: 76px;
-  height: 98px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2;
+    position: relative;
+    width: 76px;
+    height: 98px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
 }
 
 .orders-composite-thumb .cart-layer-flavor {
-  position: absolute;
-  width: 78%;
-  height: 78%;
-  bottom: 8%;
-  left: 50%;
-  transform: translateX(-50%);
-  object-fit: contain;
-  z-index: 1;
-  pointer-events: none;
+    position: absolute;
+    width: 78%;
+    height: 78%;
+    bottom: 8%;
+    left: 50%;
+    transform: translateX(-50%);
+    object-fit: contain;
+    z-index: 1;
+    pointer-events: none;
 }
 
 .orders-composite-thumb .cart-layer-toppings {
-  position: absolute;
-  width: 82%;
-  height: 82%;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  object-fit: contain;
-  z-index: 2;
-  pointer-events: none;
+    position: absolute;
+    width: 82%;
+    height: 82%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    object-fit: contain;
+    z-index: 2;
+    pointer-events: none;
 }
 
 .orders-composite-thumb .cart-layer-cup {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  object-fit: contain;
-  z-index: 3;
-  pointer-events: none;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    object-fit: contain;
+    z-index: 3;
+    pointer-events: none;
 }
 
 /* ===================================================
@@ -2412,293 +2416,313 @@ body {
    =================================================== */
 .swal2-container.mm-swal-container-top,
 div.swal2-container.mm-swal-container-top {
-  position: fixed !important;
-  inset: 0 !important;
-  width: 100vw !important;
-  height: 100vh !important;
-  z-index: 999999 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  background: rgba(89, 74, 66, 0.55) !important;
-  backdrop-filter: blur(5px) !important;
-  -webkit-backdrop-filter: blur(5px) !important;
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 999999 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: rgba(89, 74, 66, 0.55) !important;
+    backdrop-filter: blur(5px) !important;
+    -webkit-backdrop-filter: blur(5px) !important;
 }
 
 div.swal2-popup.mm-swal-popup {
-  background-color: #FFF5F4 !important;
-  background: #FFF5F4 !important;
-  border-radius: 28px !important;
-  padding: 34px 28px 28px !important;
-  border: 2px solid #FCE1DD !important;
-  box-shadow: 0 20px 48px rgba(89, 74, 66, 0.28) !important;
-  width: 90% !important;
-  max-width: 440px !important;
-  box-sizing: border-box !important;
-  text-align: center !important;
-  font-family: 'Urbanist', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    background-color: #FFF5F4 !important;
+    background: #FFF5F4 !important;
+    border-radius: 28px !important;
+    padding: 34px 28px 28px !important;
+    border: 2px solid #FCE1DD !important;
+    box-shadow: 0 20px 48px rgba(89, 74, 66, 0.28) !important;
+    width: 90% !important;
+    max-width: 440px !important;
+    box-sizing: border-box !important;
+    text-align: center !important;
+    font-family: 'Urbanist', -apple-system, BlinkMacSystemFont, sans-serif !important;
 }
 
 div.swal2-title.mm-swal-title {
-  font-family: 'Bootzy TM', 'Urbanist', sans-serif !important;
-  font-size: 24px !important;
-  font-weight: 800 !important;
-  color: #594A42 !important;
-  letter-spacing: 1.5px !important;
-  margin: 12px 0 8px !important;
-  padding: 0 !important;
-  line-height: 1.25 !important;
+    font-family: 'Bootzy TM', 'Urbanist', sans-serif !important;
+    font-size: 24px !important;
+    font-weight: 800 !important;
+    color: #594A42 !important;
+    letter-spacing: 1.5px !important;
+    margin: 12px 0 8px !important;
+    padding: 0 !important;
+    line-height: 1.25 !important;
 }
 
 div.swal2-html-container.mm-swal-html {
-  font-family: 'Urbanist', sans-serif !important;
-  font-size: 14.5px !important;
-  font-weight: 600 !important;
-  color: #7C4F38 !important;
-  line-height: 1.5 !important;
-  margin: 8px 0 0 !important;
-  padding: 0 !important;
+    font-family: 'Urbanist', sans-serif !important;
+    font-size: 14.5px !important;
+    font-weight: 600 !important;
+    color: #7C4F38 !important;
+    line-height: 1.5 !important;
+    margin: 8px 0 0 !important;
+    padding: 0 !important;
 }
 
 div.swal2-actions.mm-swal-actions {
-  margin-top: 24px !important;
-  gap: 12px !important;
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
-  width: 100% !important;
+    margin-top: 24px !important;
+    gap: 12px !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
 }
 
 button.swal2-confirm.mm-swal-confirm-btn {
-  background-color: #F48A8E !important;
-  background: #F48A8E !important;
-  color: #FFFFFF !important;
-  border-radius: 24px !important;
-  font-family: 'Urbanist', sans-serif !important;
-  font-weight: 800 !important;
-  font-size: 14px !important;
-  padding: 10px 26px !important;
-  box-shadow: 0 4px 14px rgba(244, 138, 142, 0.4) !important;
-  border: none !important;
-  outline: none !important;
-  cursor: pointer !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  transition: transform 0.15s ease, opacity 0.2s ease !important;
+    background-color: #F48A8E !important;
+    background: #F48A8E !important;
+    color: #FFFFFF !important;
+    border-radius: 24px !important;
+    font-family: 'Urbanist', sans-serif !important;
+    font-weight: 800 !important;
+    font-size: 14px !important;
+    padding: 10px 26px !important;
+    box-shadow: 0 4px 14px rgba(244, 138, 142, 0.4) !important;
+    border: none !important;
+    outline: none !important;
+    cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: transform 0.15s ease, opacity 0.2s ease !important;
 }
 
 button.swal2-confirm.mm-swal-confirm-btn:hover {
-  opacity: 0.92 !important;
-  transform: scale(1.03) !important;
+    opacity: 0.92 !important;
+    transform: scale(1.03) !important;
 }
 
-button.swal2-cancel.mm-swal-cancel-btn {
-  background-color: #FDE9E6 !important;
-  background: #FDE9E6 !important;
-  color: #594A42 !important;
-  border-radius: 24px !important;
-  font-family: 'Urbanist', sans-serif !important;
-  font-weight: 700 !important;
-  font-size: 14px !important;
-  padding: 10px 22px !important;
-  border: none !important;
-  outline: none !important;
-  cursor: pointer !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  transition: transform 0.15s ease, opacity 0.2s ease !important;
+button.swal2-cancel {
+    background-color: #FDE9E6 !important;
+    background: #FDE9E6 !important;
+    color: #594A42 !important;
+    border-radius: 24px !important;
+    font-family: 'Urbanist', sans-serif !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    padding: 10px 22px !important;
+    border: none !important;
+    outline: none !important;
+    cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: transform 0.15s ease, opacity 0.2s ease !important;
 }
 
-button.swal2-cancel.mm-swal-cancel-btn:hover {
-  opacity: 0.92 !important;
-  transform: scale(1.03) !important;
+button.swal2-cancel:hover {
+    opacity: 0.92 !important;
+    transform: scale(1.03) !important;
 }
 
 .mm-swal-thumb-box {
-  width: 90px;
-  height: 90px;
-  margin: 12px auto 6px;
-  background: #FDE8E5;
-  border-radius: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 6px;
+    width: 90px;
+    height: 90px;
+    margin: 12px auto 6px;
+    background: #FDE8E5;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
 }
 
 .mm-swal-img {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
 }
 
 .mm-swal-item-name {
-  font-family: 'Bootzy TM', 'Urbanist', sans-serif;
-  font-size: 17px;
-  font-weight: 800;
-  color: #594A42;
-  letter-spacing: 0.5px;
-  margin-top: 6px;
+    font-family: 'Bootzy TM', 'Urbanist', sans-serif;
+    font-size: 17px;
+    font-weight: 800;
+    color: #594A42;
+    letter-spacing: 0.5px;
+    margin-top: 6px;
 }
 
 .mm-swal-item-sub {
-  font-size: 13.5px;
-  font-weight: 600;
-  color: #7C4F38;
-  margin: 4px 0 0;
-  line-height: 1.4;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #7C4F38;
+    margin: 4px 0 0;
+    line-height: 1.4;
 }
 
 /* ===================================================
    MODAL SPECIFIC & RECEIPT DOWNLOAD STYLES
    =================================================== */
 .modal-config-sub {
-  font-size: 11px;
-  font-weight: 600;
-  color: #7C4F38;
+    font-size: 11px;
+    font-weight: 600;
+    color: #7C4F38;
 }
 
 .modal-size-error-msg {
-  color: #d32f2f;
-  font-size: 12px;
-  font-weight: 700;
-  margin-top: 4px;
-  display: none;
-  animation: shakeError 0.25s ease-in-out;
+    color: #d32f2f;
+    font-size: 12px;
+    font-weight: 700;
+    margin-top: 4px;
+    display: none;
+    animation: shakeError 0.25s ease-in-out;
 }
 
 @keyframes shakeError {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-4px); }
-  75% { transform: translateX(4px); }
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-4px);
+    }
+
+    75% {
+        transform: translateX(4px);
+    }
 }
 
 #printableReceiptContainer {
-  position: fixed;
-  left: -9999px;
-  top: 0;
-  display: block;
-  z-index: -999;
-  opacity: 1;
+    position: fixed;
+    left: -9999px;
+    top: 0;
+    display: block;
+    z-index: -999;
+    opacity: 1;
 }
 
 .btn-download-receipt {
-  background: #FFF5F4;
-  border: 1.5px solid #FCE1DD;
-  border-radius: 8px;
-  color: #F48A8E;
-  cursor: pointer;
-  margin-left: 6px;
-  padding: 3px 6px;
-  transition: all 0.2s ease;
+    background: #FFF5F4;
+    border: 1.5px solid #FCE1DD;
+    border-radius: 8px;
+    color: #F48A8E;
+    cursor: pointer;
+    margin-left: 6px;
+    padding: 3px 6px;
+    transition: all 0.2s ease;
 }
 
 .btn-download-receipt:hover {
-  background: #F48A8E;
-  color: #FFFFFF;
+    background: #F48A8E;
+    color: #FFFFFF;
 }
 
 .modal-drink-box {
-  position: relative;
-  overflow: visible;
-  align-items: flex-end !important;
-  justify-content: center !important;
+    position: relative;
+    overflow: visible;
+    align-items: flex-end !important;
+    justify-content: center !important;
 }
 
 .modal-drink-box::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  bottom: 3px;
-  transform: translateX(-50%);
-  width: 148px;
-  height: 56px;
-  background: var(--thumb-accent, #F48A8E);
-  border-radius: 18px;
-  z-index: 1;
-  opacity: 0.95;
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 3px;
+    transform: translateX(-50%);
+    width: 148px;
+    height: 56px;
+    background: var(--thumb-accent, #F48A8E);
+    border-radius: 18px;
+    z-index: 1;
+    opacity: 0.95;
 }
 
 .modal-drink-img {
-  position: relative;
-  z-index: 2;
-  display: block;
-  max-width: 160px !important;
-  max-height: 198px !important;
-  width: auto;
-  height: auto;
-  object-fit: contain;
-  margin: 0 auto;
+    position: relative;
+    z-index: 2;
+    display: block;
+    max-width: 160px !important;
+    max-height: 198px !important;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    margin: 0 auto;
 }
 
 /* Modal Mobile Fix */
 @media (max-width: 860px) {
-  .product-modal-backdrop {
-    padding: 12px !important;
-    align-items: flex-start !important;
-    overflow: hidden !important;
-  }
-  .product-modal-container {
-    max-width: 100% !important;
-    width: 100% !important;
-    max-height: 100% !important;
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-    padding: 34px 18px 22px !important;
-    border-radius: 20px !important;
-    gap: 16px !important;
-    box-sizing: border-box !important;
-  }
-  .modal-close-btn {
-    top: 10px !important;
-    right: 10px !important;
-    width: 28px !important;
-    height: 28px !important;
-    font-size: 13px !important;
-  }
-  .modal-top-row {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    gap: 14px !important;
-    width: 100% !important;
-  }
-  .modal-drink-box {
-    width: 160px !important;
-    height: 190px !important;
-  }
-  .modal-drink-box::after {
-    width: 138px !important;
-    height: 52px !important;
-    bottom: 3px !important;
-    border-radius: 17px !important;
-  }
-  .modal-drink-img {
-    max-width: 148px !important;
-    max-height: 180px !important;
-  }
-  .modal-drink-info {
-    width: 100% !important;
-    max-width: 100% !important;
-    gap: 10px !important;
-    box-sizing: border-box !important;
-  }
-  .modal-header-meta {
-    flex-wrap: wrap !important;
-    gap: 8px !important;
-    width: 100% !important;
-  }
-  .modal-product-title {
-    font-size: 18px !important;
-    letter-spacing: 1px !important;
-    word-break: break-word !important;
-    white-space: normal !important;
-  }
-  .modal-price-val {
-    font-size: 20px !important;
-  }
+    .product-modal-backdrop {
+        padding: 12px !important;
+        align-items: flex-start !important;
+        overflow: hidden !important;
+    }
+
+    .product-modal-container {
+        max-width: 100% !important;
+        width: 100% !important;
+        max-height: 100% !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        padding: 34px 18px 22px !important;
+        border-radius: 20px !important;
+        gap: 16px !important;
+        box-sizing: border-box !important;
+    }
+
+    .modal-close-btn {
+        top: 10px !important;
+        right: 10px !important;
+        width: 28px !important;
+        height: 28px !important;
+        font-size: 13px !important;
+    }
+
+    .modal-top-row {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 14px !important;
+        width: 100% !important;
+    }
+
+    .modal-drink-box {
+        width: 160px !important;
+        height: 190px !important;
+    }
+
+    .modal-drink-box::after {
+        width: 138px !important;
+        height: 52px !important;
+        bottom: 3px !important;
+        border-radius: 17px !important;
+    }
+
+    .modal-drink-img {
+        max-width: 148px !important;
+        max-height: 180px !important;
+    }
+
+    .modal-drink-info {
+        width: 100% !important;
+        max-width: 100% !important;
+        gap: 10px !important;
+        box-sizing: border-box !important;
+    }
+
+    .modal-header-meta {
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+        width: 100% !important;
+    }
+
+    .modal-product-title {
+        font-size: 18px !important;
+        letter-spacing: 1px !important;
+        word-break: break-word !important;
+        white-space: normal !important;
+    }
+
+    .modal-price-val {
+        font-size: 20px !important;
+    }
 }
 
 /* ===================================================
@@ -2873,31 +2897,31 @@ button.swal2-cancel.mm-swal-cancel-btn:hover {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.switch-toggle-loyalty input:checked + .slider-round-loyalty {
+.switch-toggle-loyalty input:checked+.slider-round-loyalty {
     background-color: #F48A8E;
 }
 
-.switch-toggle-loyalty input:checked + .slider-round-loyalty::before {
+.switch-toggle-loyalty input:checked+.slider-round-loyalty::before {
     transform: translateX(21px);
 }
 
 .btn-copy-ref {
-  background: #FFF5F4;
-  border: 1.5px solid #FCE1DD;
-  border-radius: 6px;
-  color: #F48A8E;
-  cursor: pointer;
-  margin-left: 6px;
-  padding: 2px 6px;
-  font-size: 11px;
-  line-height: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
+    background: #FFF5F4;
+    border: 1.5px solid #FCE1DD;
+    border-radius: 6px;
+    color: #F48A8E;
+    cursor: pointer;
+    margin-left: 6px;
+    padding: 2px 6px;
+    font-size: 11px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
 }
 
 .btn-copy-ref:hover {
-  background: #F48A8E;
-  color: #FFFFFF;
+    background: #F48A8E;
+    color: #FFFFFF;
 }

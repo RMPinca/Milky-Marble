@@ -34,7 +34,6 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    padding-top: 74px;
 }
 
 .navbar-wrapper {
@@ -70,10 +69,10 @@ body {
 
 .brand-logo-img-nav,
 .brand-container-nav img {
-    width: 44px !important;
-    height: 44px !important;
-    max-width: 44px !important;
-    max-height: 44px !important;
+    width: 54px !important;
+    height: 54px !important;
+    max-width: 54px !important;
+    max-height: 54px !important;
     object-fit: contain !important;
     display: inline-block;
     flex-shrink: 0;
@@ -84,11 +83,11 @@ body {
     font-size: 26px;
     color: #f69299;
     -webkit-text-stroke: 1px #7c4f38;
-    text-shadow: 
+    text-shadow:
         -1px -1px 0 #7c4f38,
-         1px -1px 0 #7c4f38,
-        -1px  1px 0 #7c4f38,
-         1px  1px 0 #7c4f38;
+        1px -1px 0 #7c4f38,
+        -1px 1px 0 #7c4f38,
+        1px 1px 0 #7c4f38;
     letter-spacing: 0.5px;
     line-height: 1;
     display: inline-block;
@@ -825,6 +824,7 @@ body {
         transform: scale(1.12);
     }
 }
+
 /* NOTIFICATION BELL ACTIVE / HIGHLIGHTED STATE */
 .nav-icon-btn.active,
 #navNotifBell.active {

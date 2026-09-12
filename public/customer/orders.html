@@ -92,23 +92,51 @@
 
   <!-- MAIN ORDERS WRAPPER -->
   <main class="orders-page-wrapper">
-    <!-- STATUS FILTER TABS -->
-    <nav class="orders-filter-container">
-      <button type="button" class="order-filter-pill active" onclick="filterOrders('all', this)">All</button>
-      <button type="button" class="order-filter-pill" onclick="filterOrders('confirmed', this)">Confirmed</button>
-      <button type="button" class="order-filter-pill" onclick="filterOrders('preparing', this)">Preparing</button>
-      <button type="button" class="order-filter-pill" onclick="filterOrders('ready for pickup', this)">Ready for Pickup</button>
-      <button type="button" class="order-filter-pill" onclick="filterOrders('completed', this)">Completed</button>
-      <button type="button" class="order-filter-pill" onclick="filterOrders('cancelled', this)">Cancelled</button>
-    </nav>
 
-    <!-- ORDERS LIST CONTAINER -->
-    <section class="orders-list-container" id="ordersList">
-      <div class="orders-loading-state" style="text-align: center; padding: 40px; color: #7C4F38;">
-        <i class="fa-solid fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 10px;"></i>
-        <p style="font-weight: 700;">Loading your sweet sips orders...</p>
+    <!-- VIEW 1: GUEST ORDER TRACKING LOOKUP (Inilalabas kapag Guest User) -->
+    <div id="guestTrackBox" class="guest-track-card" style="display: none;">
+      <div class="guest-track-inner">
+        <i class="fa-solid fa-receipt guest-track-icon"></i>
+        <h2>Track Your Order</h2>
+        <p>Enter the Order ID and Email address used during checkout to view your order status.</p>
+
+        <form id="guestTrackForm" onsubmit="handleGuestOrderSearch(event)">
+          <div class="guest-input-group">
+            <label for="guestOrderId">Order ID</label>
+            <input type="text" id="guestOrderId" placeholder="e.g. MM-991635" required>
+          </div>
+
+          <div class="guest-input-group">
+            <label for="guestEmail">Email Address</label>
+            <input type="email" id="guestEmail" placeholder="e.g. juandelacruz@gmail.com" required>
+          </div>
+
+          <button type="submit" class="btn-track-submit">Track Order &nbsp;→</button>
+        </form>
       </div>
-    </section>
+    </div>
+
+    <!-- VIEW 2: REGISTERED USER ORDERS SECTION -->
+    <div id="registeredOrdersSection">
+      <!-- STATUS FILTER TABS -->
+      <nav class="orders-filter-container">
+        <button type="button" class="order-filter-pill active" onclick="filterOrders('all', this)">All</button>
+        <button type="button" class="order-filter-pill" onclick="filterOrders('confirmed', this)">Confirmed</button>
+        <button type="button" class="order-filter-pill" onclick="filterOrders('preparing', this)">Preparing</button>
+        <button type="button" class="order-filter-pill" onclick="filterOrders('ready for pickup', this)">Ready for Pickup</button>
+        <button type="button" class="order-filter-pill" onclick="filterOrders('completed', this)">Completed</button>
+        <button type="button" class="order-filter-pill" onclick="filterOrders('cancelled', this)">Cancelled</button>
+      </nav>
+
+      <!-- ORDERS LIST CONTAINER -->
+      <section class="orders-list-container" id="ordersList">
+        <div class="orders-loading-state" style="text-align: center; padding: 40px; color: #7C4F38;">
+          <i class="fa-solid fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 10px;"></i>
+          <p style="font-weight: 700;">Loading your sweet sips orders...</p>
+        </div>
+      </section>
+    </div>
+
   </main>
 
   <!-- 1. ORDER STATUS DETAILS MODAL -->

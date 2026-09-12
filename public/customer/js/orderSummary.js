@@ -8,9 +8,19 @@ let availableLoyaltyPoints = 0.0;
 let lastPlacedOrderData = null;
 
 let currentRecipient = {
-  name: 'Valued Customer',
-  email: 'customer@gmail.com'
+  name: '',
+  email: ''
 };
+
+// Kumuha o gumawa ng unique Guest Session ID sa localStorage
+function getGuestSessionId() {
+  let sid = localStorage.getItem('mm_guest_session_id');
+  if (!sid) {
+    sid = 'guest_' + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
+    localStorage.setItem('mm_guest_session_id', sid);
+  }
+  return sid;
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   loadRecipientInfoFromSession();
@@ -18,11 +28,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function loadRecipientInfoFromSession() {
   const localUser = JSON.parse(localStorage.getItem('mm_user') || '{}');
-  if (localUser.full_name || localUser.username) {
-    currentRecipient.name = localUser.full_name || localUser.username;
-  }
-  if (localUser.email) {
-    currentRecipient.email = localUser.email;
+  if (localUser.customer_id) {
+    currentRecipient.name = localUser.full_name || localUser.username || '';
+    currentRecipient.email = localUser.email || '';
+  } else {
+    // Kung Guest, kuhanin mula sa naisave sa local storage o iwanang blanko
+    const savedGuest = JSON.parse(localStorage.getItem('mm_guest_recipient') || '{}');
+    currentRecipient.name = savedGuest.name || '';
+    currentRecipient.email = savedGuest.email || '';
   }
   renderRecipientDetails();
 }
@@ -31,11 +44,21 @@ function renderRecipientDetails() {
   const wrapper = document.getElementById('recipientDetailsWrapper');
   if (!wrapper) return;
 
+  const hasName = currentRecipient.name && currentRecipient.name.trim() !== '';
+  const hasEmail = currentRecipient.email && currentRecipient.email.trim() !== '';
+
+  const nameDisplay = hasName 
+    ? currentRecipient.name 
+    : '<span style="color: #d32f2f; font-weight: 600;">Not set (Click edit to add)</span>';
+  const emailDisplay = hasEmail 
+    ? currentRecipient.email 
+    : '<span style="color: #d32f2f; font-weight: 600;">Not set (Click edit to add)</span>';
+
   wrapper.innerHTML = `
-    <div class="recipient-input-card" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #FFFDFD; border: 1.5px solid #FCE1DD; border-radius: 16px;">
+    <div class="recipient-input-card" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #FFFDFD; border: 1.5px solid ${(!hasName || !hasEmail) ? '#F48A8E' : '#FCE1DD'}; border-radius: 16px;">
       <div class="recipient-display-col" style="display: flex; flex-direction: column; gap: 3px;">
-        <div style="font-size: 13.5px; color: #594A42;"><strong>Name:</strong> ${currentRecipient.name}</div>
-        <div style="font-size: 13.5px; color: #594A42;"><strong>Email:</strong> ${currentRecipient.email}</div>
+        <div style="font-size: 13.5px; color: #594A42;"><strong>Name:</strong> ${nameDisplay}</div>
+        <div style="font-size: 13.5px; color: #594A42;"><strong>Email:</strong> ${emailDisplay}</div>
       </div>
       <button type="button" class="btn-edit-recipient" onclick="openRecipientModal()" title="Edit Details" style="background: none; border: none; color: #F48A8E; font-size: 17px; cursor: pointer;">
         <i class="fa-regular fa-pen-to-square"></i>
@@ -66,7 +89,7 @@ window.renderOrderSummaryModal = async function(items = []) {
   const promoMsg = document.getElementById('promoAppliedMsg');
   if (promoMsg) promoMsg.style.display = 'none';
 
-  // Kuhanin ang loyalty points mula sa Supabase
+  // Synchronize Loyalty Points
   await syncCustomerLoyaltyPoints();
 
   // Reset Loyalty Points Toggle
@@ -121,10 +144,26 @@ window.closeOrderSummaryModal = function() {
 // ==========================================
 async function syncCustomerLoyaltyPoints() {
   const localUser = JSON.parse(localStorage.getItem('mm_user') || '{}');
-  const customerId = localUser.customer_id || 11;
+  const togglePoints = document.getElementById('toggleUseLoyaltyPoints');
+  const availableSubtext = document.getElementById('summaryLoyaltyAvailable');
+
+  // KUNG GUEST USER: I-disable ang Loyalty Points Section
+  if (!localUser.customer_id) {
+    availableLoyaltyPoints = 0.0;
+    if (availableSubtext) {
+      availableSubtext.innerText = 'Available: 0.0 pts (Sign up to earn points!)';
+    }
+    if (togglePoints) {
+      togglePoints.checked = false;
+      togglePoints.disabled = true;
+    }
+    return;
+  }
+
+  if (togglePoints) togglePoints.disabled = false;
 
   try {
-    const res = await fetch(`/api/customer/profile?customer_id=${customerId}`);
+    const res = await fetch(`/api/customer/profile?customer_id=${localUser.customer_id}`);
     const result = await res.json();
 
     if (res.ok && result.status === 'success') {
@@ -134,7 +173,6 @@ async function syncCustomerLoyaltyPoints() {
       const formattedPts = availableLoyaltyPoints.toFixed(1);
       const pesoEquiv = (availableLoyaltyPoints * 1.0).toFixed(2);
 
-      const availableSubtext = document.getElementById('summaryLoyaltyAvailable');
       if (availableSubtext) {
         availableSubtext.innerText = `Available: ${formattedPts} pts (₱${pesoEquiv})`;
       }
@@ -312,115 +350,41 @@ window.saveRecipientDetails = function(event) {
   currentRecipient.email = emailVal;
 
   const localUser = JSON.parse(localStorage.getItem('mm_user') || '{}');
-  localUser.full_name = nameVal;
-  localUser.email = emailVal;
-  localStorage.setItem('mm_user', JSON.stringify(localUser));
+  if (localUser.customer_id) {
+    localUser.full_name = nameVal;
+    localUser.email = emailVal;
+    localStorage.setItem('mm_user', JSON.stringify(localUser));
+  } else {
+    localStorage.setItem('mm_guest_recipient', JSON.stringify({ name: nameVal, email: emailVal }));
+  }
 
   renderRecipientDetails();
   closeRecipientModal();
 };
 
 // ==========================================
-// RECEIPT DOM & PDF DOWNLOAD
-// ==========================================
-function buildReceiptDOM(order) {
-  const container = document.getElementById('printableReceiptContainer');
-  if (!container) return;
-
-  const formattedItems = (order.items || currentOrderSummaryItems).map(item => `
-    <tr style="border-bottom: 1px dashed #FCE1DD;">
-      <td style="padding: 8px 4px; font-size: 12px; color: #594A42;">
-        <strong>${item.size || '12oz'} ${item.title}</strong><br>
-        <span style="font-size: 10.5px; color: #7C4F38;">${item.toppings || ''} ${item.addons || ''}</span>
-      </td>
-      <td style="padding: 8px 4px; font-size: 12px; text-align: center; color: #594A42;">${item.quantity || 1}x</td>
-      <td style="padding: 8px 4px; font-size: 12px; text-align: right; font-weight: 700; color: #594A42;">₱ ${((item.unit_price || 15) * (item.quantity || 1)).toFixed(2)}</td>
-    </tr>
-  `).join('');
-
-  container.innerHTML = `
-    <div id="receiptPDFContent" style="width: 380px; padding: 28px; background: #FFFDFD; font-family: 'Urbanist', Arial, sans-serif; color: #594A42; border: 2px solid #FCE1DD; border-radius: 20px;">
-      <div style="text-align: center; margin-bottom: 16px;">
-        <h2 style="font-family: 'Fredoka', cursive, sans-serif; font-size: 24px; color: #F48A8E; margin: 0;">Milky Marble</h2>
-        <p style="font-size: 11.5px; color: #7C4F38; margin: 4px 0 0;">Handcrafted Bouncy Sips & Layered Treats</p>
-      </div>
-      
-      <div style="font-size: 12px; border-top: 1px dashed #FCE1DD; border-bottom: 1px dashed #FCE1DD; padding: 10px 0; margin-bottom: 14px; line-height: 1.5;">
-        <div><strong>Order No:</strong> ${order.order_number || '#MM-0000'}</div>
-        <div><strong>Customer:</strong> ${currentRecipient.name}</div>
-        <div><strong>Email:</strong> ${currentRecipient.email}</div>
-        <div><strong>Pick-up Schedule:</strong> ${order.pickup_date || 'N/A'}</div>
-        <div><strong>Payment:</strong> ${selectedPaymentMethod}</div>
-      </div>
-
-      <table style="width: 100%; border-collapse: collapse; margin-bottom: 14px;">
-        <thead>
-          <tr style="border-bottom: 1.5px solid #FCE1DD; font-size: 11px; text-transform: uppercase; color: #7C4F38;">
-            <th style="text-align: left; padding-bottom: 6px;">Item</th>
-            <th style="text-align: center; padding-bottom: 6px;">Qty</th>
-            <th style="text-align: right; padding-bottom: 6px;">Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${formattedItems}
-        </tbody>
-      </table>
-
-      <div style="border-top: 1.5px solid #FCE1DD; padding-top: 8px; font-size: 12.5px; display: flex; flex-direction: column; gap: 4px;">
-        <div style="display: flex; justify-content: space-between;">
-          <span>Subtotal:</span>
-          <span>₱ ${currentSubtotal.toFixed(2)}</span>
-        </div>
-        ${appliedPromoDiscount > 0 ? `
-          <div style="display: flex; justify-content: space-between; color: #2e7d32;">
-            <span>Promo Discount:</span>
-            <span>- ₱ ${appliedPromoDiscount.toFixed(2)}</span>
-          </div>
-        ` : ''}
-        ${order.points_used > 0 ? `
-          <div style="display: flex; justify-content: space-between; color: #E27D80; font-weight: 700;">
-            <span>Points Discount (${order.points_used.toFixed(1)} pts):</span>
-            <span>- ₱ ${order.points_used.toFixed(2)}</span>
-          </div>
-        ` : ''}
-        <div style="display: flex; justify-content: space-between; font-size: 16px; font-weight: 800; border-top: 1px dashed #FCE1DD; padding-top: 6px; margin-top: 4px;">
-          <span>Total Paid:</span>
-          <span style="color: #F48A8E;">₱ ${order.total_amount.toFixed(2)}</span>
-        </div>
-        <div style="background: #FFF5F4; border-radius: 8px; padding: 6px; text-align: center; margin-top: 8px; font-size: 11.5px; font-weight: 700;">
-          Points Earned: +${Number(order.points_earned || 0).toFixed(1)} pts
-        </div>
-      </div>
-
-      <div style="text-align: center; margin-top: 18px; font-size: 11px; color: #7C4F38;">
-        Thank you for your sweet support! See you at the Marble Bar!
-      </div>
-    </div>
-  `;
-}
-
-window.downloadReceiptPDF = function() {
-  if (!lastPlacedOrderData) return;
-  buildReceiptDOM(lastPlacedOrderData);
-
-  const element = document.getElementById('receiptPDFContent');
-  if (!element || typeof html2pdf === 'undefined') return;
-
-  const opt = {
-    margin: 10,
-    filename: `Receipt_${lastPlacedOrderData.order_number || 'MilkyMarble'}.pdf`,
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true },
-    jsPDF: { unit: 'mm', format: 'a5', orientation: 'portrait' }
-  };
-
-  html2pdf().set(opt).from(element).save();
-};
-
-// ==========================================
-// CONFIRM PLACE ORDER (SUBMIT ORDER WITH ORDER_TYPE)
+// CONFIRM PLACE ORDER (SUPPORT FOR REGISTERED & GUEST)
 // ==========================================
 window.confirmPlaceOrder = async function() {
+  // 1. VALIDATION FOR RECIPIENT DETAILS
+  if (!currentRecipient.name || !currentRecipient.name.trim() || !currentRecipient.email || !currentRecipient.email.trim()) {
+    if (typeof Swal !== 'undefined') {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Recipient Details Required',
+        text: 'Please complete Recipient Details (Full Name and Email) before placing your order.',
+        confirmButtonText: 'Set Details',
+        confirmButtonColor: '#F48A8E'
+      }).then(() => {
+        openRecipientModal();
+      });
+    } else {
+      openRecipientModal();
+    }
+    return;
+  }
+
+  // 2. VALIDATION FOR PICK-UP DATE
   const pickupInput = document.getElementById('pickupDateInput');
   const dateReq = document.getElementById('dateRequiredMsg');
 
@@ -430,18 +394,20 @@ window.confirmPlaceOrder = async function() {
   }
 
   const localUser = JSON.parse(localStorage.getItem('mm_user') || '{}');
-  const customerId = localUser.customer_id || 11;
+  const isGuest = !localUser.customer_id;
   const isPointsToggled = document.getElementById('toggleUseLoyaltyPoints')?.checked || false;
 
-  const pointsToUse = isPointsToggled ? appliedLoyaltyDiscount : 0.0;
+  const pointsToUse = (!isGuest && isPointsToggled) ? appliedLoyaltyDiscount : 0.0;
   const finalPayableTotal = Math.max(0, currentSubtotal - appliedPromoDiscount - pointsToUse);
 
-  // Tukuyin ang order_type ayon sa constraint ng Supabase: 'custom_build' o 'preset'
   const isCustomCup = currentOrderSummaryItems.some(it => it.is_custom);
   const orderTypeVal = isCustomCup ? 'custom_build' : 'preset';
 
   const payload = {
-    customer_id: customerId,
+    customer_id: isGuest ? null : localUser.customer_id,
+    session_id: isGuest ? getGuestSessionId() : null,
+    guest_name: currentRecipient.name,
+    guest_email: currentRecipient.email,
     items: currentOrderSummaryItems,
     subtotal: currentSubtotal,
     discount_amount: appliedPromoDiscount,
@@ -480,14 +446,15 @@ window.confirmPlaceOrder = async function() {
         pickup_date: pickupInput.value
       };
 
-      // Permanenteng i-update ang points sa screen gamit ang value mula sa Supabase
-      const updatedBalance = parseFloat(data.new_loyalty_points || 0);
-      availableLoyaltyPoints = updatedBalance;
+      if (!isGuest) {
+        const updatedBalance = parseFloat(data.new_loyalty_points || 0);
+        availableLoyaltyPoints = updatedBalance;
 
-      const ptsHeader = document.getElementById('displayLoyaltyPoints');
-      const pesoHeader = document.getElementById('displayLoyaltyPeso');
-      if (ptsHeader) ptsHeader.innerText = `${updatedBalance.toFixed(1)} pts`;
-      if (pesoHeader) pesoHeader.innerText = `(₱${(updatedBalance * 1.0).toFixed(2)})`;
+        const ptsHeader = document.getElementById('displayLoyaltyPoints');
+        const pesoHeader = document.getElementById('displayLoyaltyPeso');
+        if (ptsHeader) ptsHeader.innerText = `${updatedBalance.toFixed(1)} pts`;
+        if (pesoHeader) pesoHeader.innerText = `(₱${(updatedBalance * 1.0).toFixed(2)})`;
+      }
 
       if (typeof loadRecentOrders === 'function') {
         loadRecentOrders();
@@ -499,13 +466,16 @@ window.confirmPlaceOrder = async function() {
           title: 'Order Confirmed!',
           html: `
             <p style="color: #7C4F38; font-size: 14px; margin-bottom: 8px;">Order No: <strong>${data.order.order_number}</strong></p>
-            ${data.points_used > 0 ? `<p style="color: #E27D80; font-weight: 700; margin: 4px 0;">Points Used: -${data.points_used.toFixed(1)} pts</p>` : ''}
-            <div style="background: #FFF5F4; border-radius: 12px; padding: 10px; margin: 10px 0; font-weight: 800; color: #594A42;">
-              🎉 You earned +${Number(data.points_earned || 0).toFixed(1)} loyalty points!
-            </div>
-            <button type="button" class="btn-download-receipt" onclick="downloadReceiptPDF()" style="margin-top: 10px; padding: 8px 18px; font-weight: 800; border-radius: 99px; border: 1.5px solid #FCE1DD; background: #FFF; color: #F48A8E; cursor: pointer;">
-              <i class="fa-solid fa-file-arrow-down"></i> Download Receipt (PDF)
-            </button>
+            ${!isGuest && data.points_used > 0 ? `<p style="color: #E27D80; font-weight: 700; margin: 4px 0;">Points Used: -${data.points_used.toFixed(1)} pts</p>` : ''}
+            ${!isGuest ? `
+              <div style="background: #FFF5F4; border-radius: 12px; padding: 10px; margin: 10px 0; font-weight: 800; color: #594A42;">
+                🎉 You earned +${Number(data.points_earned || 0).toFixed(1)} loyalty points!
+              </div>
+            ` : `
+              <div style="background: #FFF5F4; border-radius: 12px; padding: 10px; margin: 10px 0; font-size: 12.5px; color: #7C4F38;">
+                📧 An order confirmation has been logged for <strong>${currentRecipient.email}</strong>. Use your Order ID to track your sips!
+              </div>
+            `}
           `,
           confirmButtonText: 'Got It!',
           confirmButtonColor: '#594A42'
