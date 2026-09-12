@@ -48,6 +48,18 @@ const PRESET_SIGNATURES = [
     price_8oz: 15.00,
     price_12oz: 19.00,
     rating: "0.0"
+  },
+  {
+    id: 5,
+    title: "QR Ph Test Item",
+    flavor: "Coffee",
+    variation: "Cubes",
+    toppings: [],
+    accent_color: "#F48A8E",
+    image: "images/Bubbly Coffee Jelly.png",
+    price_8oz: 1.00,
+    price_12oz: 1.00,
+    rating: "0.0"
   }
 ];
 
