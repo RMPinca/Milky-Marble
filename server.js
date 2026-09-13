@@ -164,9 +164,8 @@ app.get('/customer/:page', (req, res, next) => {
 });
 
 app.get('/', (req, res) => {
-  res.redirect('/customer/home.html');
+  res.redirect('/customer/home.html');   // ← change this line
 });
-
 function getCustomerId(req) {
   return req.headers['x-customer-id'] || req.query.customer_id || (req.body && req.body.customer_id) || 11;
 }
